@@ -1,0 +1,78 @@
+"use client";
+
+import { useState } from "react";
+import { updateFood } from "../api/food.api";
+
+export default function EditFoodForm({ food, onClose, onSuccess }) {
+  const [name, setName] = useState(food.name || "");
+  const [price, setPrice] = useState(food.price || 0);
+  const [description, setDescription] = useState(food.description || "");
+  const [files, setFiles] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  async function submit(e) {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    try {
+      const fd = new FormData();
+      fd.append("name", name);
+      fd.append("price", String(price));
+      fd.append("description", description);
+      if (files && files.length) {
+        for (let i = 0; i < files.length; i++) fd.append("images", files[i]);
+      }
+
+      await updateFood(food._id, fd);
+      onSuccess && onSuccess();
+      onClose && onClose();
+    } catch (err) {
+      setError(err.message || "Update failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+      <form
+        onSubmit={submit}
+        className="relative w-full max-w-lg rounded-lg bg-[var(--background)] p-6 text-stone-950 z-10"
+      >
+        <h3 className="text-lg font-semibold mb-4 text-stone-950">Edit Food</h3>
+
+        {error && <div className="mb-2 text-sm text-red-600">{error}</div>}
+
+        <label className="block mb-2">
+          <span className="text-sm text-stone-950">Name</span>
+          <input value={name} onChange={(e) => setName(e.target.value)} required className="mt-1 block w-full rounded border px-3 py-2 text-stone-950" />
+        </label>
+
+        <label className="block mb-2">
+          <span className="text-sm text-stone-950">Price (NGN)</span>
+          <input type="number" value={price} onChange={(e) => setPrice(Number(e.target.value))} required className="mt-1 block w-full rounded border px-3 py-2 text-stone-950" />
+        </label>
+
+        <label className="block mb-2">
+          <span className="text-sm text-stone-950">Description</span>
+          <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="mt-1 block w-full rounded border px-3 py-2 text-stone-950" rows={3} />
+        </label>
+
+        <label className="block mb-4">
+          <span className="text-sm text-stone-950">Images (optional, replace existing)</span>
+          <input type="file" accept="image/*" multiple onChange={(e) => setFiles(e.target.files)} className="mt-1 block w-full" />
+        </label>
+
+        <div className="flex justify-end gap-2">
+          <button type="button" onClick={onClose} className="px-4 py-2 rounded bg-white/10 text-stone-950">Cancel</button>
+          <button type="submit" disabled={loading} className="px-4 py-2 rounded bg-[var(--color-primary)] text-stone-950">
+            {loading ? "Saving..." : "Save"}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
