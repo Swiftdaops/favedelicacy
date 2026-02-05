@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import AddDrinkButton from "../../../components/AddDrinkButton";
-import EditDrinkForm from "../../../components/EditDrinkForm";
-import { getDrinks, deleteDrink, updateDrink } from "../../../api/drink.api";
+import AddDrinkButton from "@/components/AddDrinkButton";
+import EditDrinkForm from "@/components/EditDrinkForm";
+import { getDrinks, deleteDrink, updateDrink } from "../../../drink.api";
 import { Eye, EyeOff } from "lucide-react";
 
 export default function AdminDrinksPage() {

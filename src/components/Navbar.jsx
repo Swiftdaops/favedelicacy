@@ -77,6 +77,13 @@ export default function PublicNavbar() {
               <span className="font-medium">Contact</span>
             </Link>
 
+            <Link
+              href="/test"
+              className="hidden sm:flex items-center gap-2 text-stone-900 hover:text-red-600"
+            >
+              <span className="font-medium">Test</span>
+            </Link>
+
             <button
               aria-label="Search"
               onClick={() => openSearch()}
@@ -183,6 +190,14 @@ export default function PublicNavbar() {
               >
                 <Phone className="h-5 w-5 text-red-600" />
                 <span className="font-medium">Contact</span>
+              </Link>
+
+              <Link
+                href="/test"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-3 rounded-lg p-3 hover:bg-red-50 text-stone-900"
+              >
+                <span className="font-medium">Test</span>
               </Link>
             </nav>
           </div>

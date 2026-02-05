@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getPayments, verifyPayment, deletePayment } from "../../../api/payment.api";
-import { updateOrderStatus } from "../../../api/order.api";
+import { getPayments, verifyPayment, deletePayment } from "../../../payment.api";
+import { updateOrderStatus } from "../../../order.api";
 
 export default function Payments() {
   const [payments, setPayments] = useState([]);

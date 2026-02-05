@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getOrders } from "../../../api/order.api";
-import { getPayments } from "../../../api/payment.api";
+import { getOrders } from "../../../order.api";
+import { getPayments } from "../../../payment.api";
 
 export default function Dashboard() {
   const [counts, setCounts] = useState({ foods: 0, orders: 0, payments: 0 });
