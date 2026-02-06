@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { createFoodPublic } from "../api/food.api";
+import { createFoodPublic } from "@/api/food.api";
 
 export default function AddFoodButton({ onSuccess }) {
   const [open, setOpen] = useState(false);

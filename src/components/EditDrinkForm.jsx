@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { updateDrink } from "../api/drink.api";
+import { updateDrink } from "@/api/drink.api";
 
 export default function EditDrinkForm({ initial, onClose, onSaved }) {
   const [form, setForm] = useState({ name: "", price: "", description: "" });

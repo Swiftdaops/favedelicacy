@@ -27,3 +27,5 @@ export default function Home() {
     </>
   );
 }
+
+export const revalidate = 3600; // cache home page for 1 hour (ISR)

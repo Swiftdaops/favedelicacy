@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { updateFood } from "../api/food.api";
+import { updateFood } from "@/api/food.api";
 
 export default function EditFoodForm({ food, onClose, onSuccess }) {
   const [name, setName] = useState(food.name || "");

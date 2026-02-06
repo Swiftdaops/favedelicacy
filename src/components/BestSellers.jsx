@@ -6,7 +6,7 @@ import { ShoppingCart } from "lucide-react";
 import useCartStore from "@/store/cartStore";
 import "swiper/css";
 import { useEffect, useState } from "react";
-import { getFoods } from "../api/food.api";
+import { getFoods } from "@/api/food.api";
 
 export default function BestSellers() {
   const [foods, setFoods] = useState([]);

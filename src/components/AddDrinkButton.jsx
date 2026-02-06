@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { createDrink } from "../api/drink.api";
+import { createDrink } from "@/api/drink.api";
 
 export default function AddDrinkButton({ onSuccess }) {
   const [open, setOpen] = useState(false);

@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { ShoppingCart, Plus, Minus } from "lucide-react";
-import { getDrinks } from "../api/drink.api";
+import { getDrinks } from "@/api/drink.api";
 import { useCartStore } from "../store/cartStore";
 
 // framer-motion handles animations; no external carousel dependency required
