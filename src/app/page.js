@@ -11,10 +11,7 @@ import FinalCTA from "@/components/FinalCTA";
 export default function Home() {
   return (
     <>
-      <div className="p-4 text-center">
-        <Link href="/test" className="text-sm underline">
-          Go to Test Page
-        </Link>
+      <div className=" text-center">
       </div>
       <Hero />
       <WhyChooseUs />

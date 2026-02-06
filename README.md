@@ -34,3 +34,30 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Favicons and Attribution
+
+Add the Flaticon "Chef" icon (Freepik) as the site favicon by downloading the icon files from:
+
+- https://www.flaticon.com/free-icons/chef (Chef icons created by Freepik - Flaticon)
+
+Place the downloaded images in `public/` with these filenames:
+
+- `chef-icon-512.png` (512x512)
+- `chef-icon-192.png` (192x192)
+- `chef-icon-32.png` (32x32)
+- `chef-icon-16.png` (16x16)
+
+The app already references these files in `src/app/layout.js` and `public/manifest.json`.
+
+Required attribution (place in README or site footer):
+
+<a href="https://www.flaticon.com/free-icons/chef" title="chef icons">Chef icons created by Freepik - Flaticon</a>
+
+To auto-generate missing sizes and a `favicon.ico`, run:
+
+```bash
+npm install sharp png-to-ico --save-dev
+npm run generate:favicons
+```
+

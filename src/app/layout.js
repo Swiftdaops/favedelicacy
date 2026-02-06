@@ -4,7 +4,7 @@ import PublicNavbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import BubbleSearch from "@/components/BubbleSearch";
 
-const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://example.com").replace(/\/+$/, "");
+const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://favedelicacy.vercel.app/").replace(/\/+$/, "");
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,11 +38,30 @@ export const metadata = {
     title: "Fave Delicacy",
     description: "Order delicious food and drinks for delivery.",
   },
+  icons: {
+    icon: [
+      { url: '/chef-icon-32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/chef-icon-16.png', sizes: '16x16', type: 'image/png' },
+    ],
+    shortcut: '/chef-icon-32.png',
+    apple: '/chef-icon-192.png',
+    other: [
+      { url: '/chef-icon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
+  },
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#ffffff" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-title" content="Fave Delicacy" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+      </head>
       <body
         suppressHydrationWarning
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}

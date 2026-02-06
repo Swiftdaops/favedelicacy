@@ -1,0 +1,21 @@
+{
+  "name": "Fave Delicacy",
+  "short_name": "Fave",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "description": "Order delicious food and drinks for delivery.",
+  "icons": [
+    {
+      "src": "/chef-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/chef-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
