@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getOrders, updateOrderStatus, deleteOrder } from "../../../order.api";
+import { getOrders, updateOrderStatus, deleteOrder } from "@/api/order.api";
 import OrdersTable from "@/components/OrdersTable";
 
 export default function Orders() {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getFoods, deleteFood, updateFood } from "../../../food.api";
+import { getFoods, deleteFood, updateFood } from "@/api/food.api";
 import { Eye, EyeOff } from "lucide-react";
 import AddFoodButton from "@/components/AddFoodButton";
 import { motion } from "framer-motion";

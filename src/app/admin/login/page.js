@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { loginAdmin } from "../../../auth.api";
+import { loginAdmin } from "@/api/auth.api";
 
 export default function AdminLogin() {
   const router = useRouter();

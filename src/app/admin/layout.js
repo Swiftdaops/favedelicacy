@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { logoutAdmin, getAdminProfile, uploadAdminAvatar } from "../../auth.api";
+import { logoutAdmin, getAdminProfile, uploadAdminAvatar } from "@/api/auth.api";
 import { Grid, Utensils, Coffee, Package, CreditCard, Tag, LogOut, Menu, X, Plus } from "lucide-react";
 
 export default function AdminLayout({ children }) {
