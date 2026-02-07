@@ -86,7 +86,7 @@ export default function PublicNavbar() {
             </button>
 
             <button 
-              onClick={() => toggleDrawer(true)} 
+              onClick={() => { document.activeElement?.blur(); toggleDrawer(true); }} 
               className="relative rounded-full p-2 hover:bg-red-100 transition"
             >
               <ShoppingBag className="h-5 w-5 text-red-600" />
@@ -109,7 +109,7 @@ export default function PublicNavbar() {
             </button>
 
             <button 
-              onClick={() => toggleDrawer(true)} 
+              onClick={() => { document.activeElement?.blur(); toggleDrawer(true); }} 
               className="relative rounded-full p-2 hover:bg-red-100 transition"
             >
               <ShoppingBag className="h-5 w-5 text-red-600" />
@@ -122,7 +122,7 @@ export default function PublicNavbar() {
 
             <button
               aria-label="Menu"
-              onClick={() => setOpen(true)}
+              onClick={() => { document.activeElement?.blur(); setOpen(true); }}
               className="rounded-full p-2 hover:bg-red-100 transition"
             >
               <Menu className="h-6 w-6 text-red-600" />
