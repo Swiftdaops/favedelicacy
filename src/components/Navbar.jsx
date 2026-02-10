@@ -77,12 +77,7 @@ export default function PublicNavbar() {
               <span className="font-medium">Contact</span>
             </Link>
 
-            <Link
-              href="/test"
-              className="hidden sm:flex items-center gap-2 text-stone-900 hover:text-red-600"
-            >
-              <span className="font-medium">Test</span>
-            </Link>
+    
 
             <button
               aria-label="Search"
