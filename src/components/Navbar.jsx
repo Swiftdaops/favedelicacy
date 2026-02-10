@@ -192,13 +192,7 @@ export default function PublicNavbar() {
                 <span className="font-medium">Contact</span>
               </Link>
 
-              <Link
-                href="/test"
-                onClick={() => setOpen(false)}
-                className="flex items-center gap-3 rounded-lg p-3 hover:bg-red-50 text-stone-900"
-              >
-                <span className="font-medium">Test</span>
-              </Link>
+            
             </nav>
           </div>
         </div>

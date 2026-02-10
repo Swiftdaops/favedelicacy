@@ -4,7 +4,7 @@ import PublicNavbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import BubbleSearch from "@/components/BubbleSearch";
 
-const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://favedelicacy.vercel.app/").replace(/\/+$/, "");
+const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://favedelicacy.store").replace(/\/+$/, "");
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
