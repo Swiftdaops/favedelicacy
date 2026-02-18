@@ -27,12 +27,20 @@ export const login = async (req, res, next) => {
       { expiresIn: "7d" }
     );
 
-    res.cookie("token", token, {
+    const isProd = process.env.NODE_ENV === "production";
+
+    // Cross-site cookie support:
+    // - When frontend and backend are on different domains, the browser will only
+    //   send cookies if SameSite is "none" and Secure is true.
+    // - In local dev (http), keep Secure false.
+    const cookieOptions = {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    };
+
+    res.cookie("token", token, cookieOptions);
     console.log(`Login successful for: ${email}`);
     res.json({ message: "Login successful" });
   } catch (err) {
@@ -41,7 +49,11 @@ export const login = async (req, res, next) => {
 };
 
 export const logout = (req, res) => {
-  res.clearCookie("token");
+  const isProd = process.env.NODE_ENV === "production";
+  res.clearCookie("token", {
+    secure: isProd,
+    sameSite: isProd ? "none" : "lax",
+  });
   res.json({ message: "Logged out" });
 };
 

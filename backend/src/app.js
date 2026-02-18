@@ -26,11 +26,19 @@ if (!process.env.CLOUDINARY_API_SECRET || !process.env.CLOUDINARY_API_KEY || !pr
 
 app.use(helmet());
 
-// CORS configuration - Allows your frontend to send cookies (credentials)
-app.use(cors({ 
-  origin: process.env.CLIENT_URL || "http://localhost:3000", 
-  credentials: true 
-}));
+// CORS configuration - allows the frontend to send cookies (credentials)
+const allowedOrigin =
+  process.env.CLIENT_URL ||
+  (process.env.NODE_ENV === 'production'
+    ? 'https://favedelicacy.store'
+    : 'http://localhost:3000');
+
+app.use(
+  cors({
+    origin: allowedOrigin,
+    credentials: true,
+  })
+);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -40,6 +48,8 @@ app.use(cookieParser());
 const limiter = rateLimit({ 
   windowMs: 15 * 60 * 1000, 
   max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
   message: { message: "Too many requests, please try again later." }
 });
 app.use('/api', limiter);
@@ -48,7 +58,7 @@ app.use('/api', limiter);
 app.use('/api', routes);
 
 // Global Health Check
-app.get('/', (req, res) => res.json({ ok: true, status: "Server is running" }));
+app.get('/', (req, res) => res.json({ ok: true, environment: process.env.NODE_ENV }));
 
 // Global Error Handler - Prevents the 500 error from crashing the whole server process
 app.use((err, req, res, next) => {
@@ -56,8 +66,7 @@ app.use((err, req, res, next) => {
   const message = err && (err.message || err.toString()) || "Something went wrong on the server";
   res.status(err.status || 500).json({
     message,
-    // include minimal detail in dev only
-    ...(process.env.NODE_ENV === 'development' ? { stack: err.stack } : {}),
+    ...(process.env.NODE_ENV !== 'production' ? { stack: err.stack } : {}),
   });
 });
 
