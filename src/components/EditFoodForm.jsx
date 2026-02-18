@@ -41,11 +41,11 @@ export default function EditFoodForm({ food, onClose, onSuccess }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
       <form
         onSubmit={submit}
-        className="relative w-full max-w-lg rounded-lg bg-[var(--background)] p-6 text-stone-950 z-10"
+        className="relative w-full max-w-lg rounded-lg bg-[var(--background)] p-4 sm:p-6 text-stone-950 z-10 max-h-[90vh] overflow-y-auto"
       >
         <h3 className="text-lg font-semibold mb-4 text-stone-950">Edit Food</h3>
 

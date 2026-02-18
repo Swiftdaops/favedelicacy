@@ -56,7 +56,7 @@ export default function AddFoodButton({ onSuccess }) {
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-4 sm:p-6 bg-black/40">
-          <div className="w-full max-w-md site-bg/60 backdrop-blur-sm border border-white/6 rounded-lg p-4 sm:p-6">
+          <div className="w-full max-w-md sm:max-w-md site-bg/60 backdrop-blur-sm border border-white/6 rounded-lg p-4 sm:p-6 max-h-[90vh] overflow-hidden">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-lg font-semibold text-stone-950">Add Food</h3>
               <button onClick={() => setOpen(false)} className="p-2 rounded hover:bg-white/5">
@@ -64,7 +64,7 @@ export default function AddFoodButton({ onSuccess }) {
               </button>
             </div>
 
-              <form onSubmit={submit} className="flex flex-col gap-3">
+              <form onSubmit={submit} className="flex flex-col gap-3 max-h-[72vh] overflow-y-auto">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <label className="flex flex-col">
                   <span className="text-sm text-stone-950">Name</span>
