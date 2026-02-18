@@ -1,4 +1,5 @@
 import { Geist, Geist_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import PublicNavbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -30,6 +31,7 @@ export default function RootLayout({ children }) {
         {children}
         <Footer />
         <BubbleSearch />
+        <Analytics />
       </body>
     </html>
   );
