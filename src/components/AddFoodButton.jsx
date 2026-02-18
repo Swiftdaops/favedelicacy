@@ -7,6 +7,7 @@ export default function AddFoodButton({ onSuccess }) {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ name: "", price: "", description: "" });
   const [files, setFiles] = useState([]);
+  const [extras, setExtras] = useState([]);
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -17,6 +18,18 @@ export default function AddFoodButton({ onSuccess }) {
     setFiles(Array.from(e.target.files || []));
   }
 
+  function addExtra() {
+    setExtras((s) => [...s, { name: '', price: '' }]);
+  }
+
+  function updateExtra(idx, key, value) {
+    setExtras((s) => s.map((e, i) => (i === idx ? { ...e, [key]: value } : e)));
+  }
+
+  function removeExtra(idx) {
+    setExtras((s) => s.filter((_, i) => i !== idx));
+  }
+
   async function submit(e) {
     e.preventDefault();
     try {
@@ -24,6 +37,7 @@ export default function AddFoodButton({ onSuccess }) {
       fd.append("name", form.name);
       fd.append("price", form.price);
       fd.append("description", form.description);
+      if (extras.length) fd.append("extras", JSON.stringify(extras));
       files.forEach((f) => fd.append("images", f));
 
       await createFoodPublic(fd);
@@ -71,6 +85,20 @@ export default function AddFoodButton({ onSuccess }) {
                 <span className="text-sm text-stone-950">Images (multiple)</span>
                 <input type="file" multiple accept="image/*" onChange={handleFiles} className="mt-1" />
               </label>
+
+              <div className="mt-3">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-stone-950">Extras (optional)</span>
+                  <button type="button" onClick={addExtra} className="text-sm text-blue-600">+ Add</button>
+                </div>
+                {extras.map((ex, i) => (
+                  <div key={i} className="grid grid-cols-3 gap-2 mb-2">
+                    <input value={ex.name} onChange={(e) => updateExtra(i, 'name', e.target.value)} placeholder="Name" className="col-span-2 p-2 rounded bg-white/10" />
+                    <input value={ex.price} onChange={(e) => updateExtra(i, 'price', e.target.value)} placeholder="Price" type="number" className="p-2 rounded bg-white/10" />
+                    <div className="col-span-3 text-right"><button type="button" onClick={() => removeExtra(i)} className="text-sm text-red-600">Remove</button></div>
+                  </div>
+                ))}
+              </div>
 
               {files.length > 0 && (
                 <div className="grid grid-cols-3 gap-2">

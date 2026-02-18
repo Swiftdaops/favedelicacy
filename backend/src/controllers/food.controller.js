@@ -29,6 +29,18 @@ export const createFood = async (req, res, next) => {
     const payload = { ...req.body, images };
     if (payload.price) payload.price = Number(payload.price);
 
+    // Parse extras if sent as JSON string (from FormData)
+    if (payload.extras && typeof payload.extras === "string") {
+      try {
+        const parsed = JSON.parse(payload.extras);
+        payload.extras = Array.isArray(parsed)
+          ? parsed.map((e) => ({ name: e.name, price: Number(e.price) || 0 }))
+          : [];
+      } catch (err) {
+        payload.extras = [];
+      }
+    }
+
     const food = await Food.create(payload);
     res.status(201).json(food);
   } catch (err) {
@@ -50,6 +62,18 @@ export const updateFood = async (req, res, next) => {
     }
 
     if (data.price) data.price = Number(data.price);
+
+    // Parse extras if provided as JSON string
+    if (data.extras && typeof data.extras === "string") {
+      try {
+        const parsed = JSON.parse(data.extras);
+        data.extras = Array.isArray(parsed)
+          ? parsed.map((e) => ({ name: e.name, price: Number(e.price) || 0 }))
+          : [];
+      } catch (err) {
+        data.extras = [];
+      }
+    }
 
     const food = await Food.findByIdAndUpdate(req.params.id, data, { new: true });
     if (!food) return res.status(404).json({ message: "Food not found" });
