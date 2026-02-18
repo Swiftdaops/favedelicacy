@@ -1,39 +1,17 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { logoutAdmin, getAdminProfile, uploadAdminAvatar } from "../../api/auth.api";
-import { Grid, Utensils, Coffee, Package, CreditCard, Tag, LogOut, Menu, X, Plus } from "lucide-react";
+import { logoutAdmin, uploadAdminAvatar } from "../../api/auth.api";
+import { Grid, Utensils, Coffee, Package, CreditCard, LogOut, Menu, Plus } from "lucide-react";
+import { AuthProvider, useAuth } from "../../context/AuthProvider";
 
-export default function AdminLayout({ children }) {
+function AdminLayoutInner({ children }) {
   const [open, setOpen] = useState(true);
-  const [admin, setAdmin] = useState(null);
   const fileRef = useRef(null);
   const router = useRouter();
-
-  useEffect(() => {
-    // start collapsed on small screens
-    const handleResize = () => setOpen(window.innerWidth >= 768);
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  useEffect(() => {
-    let mounted = true;
-    async function load() {
-      try {
-        const res = await getAdminProfile();
-        if (!mounted) return;
-        setAdmin(res?.data || null);
-      } catch (err) {
-        // ignore
-      }
-    }
-    load();
-    return () => (mounted = false);
-  }, []);
+  const { admin, setAdmin } = useAuth();
 
   return (
     <div className="min-h-screen flex text-stone-900">
@@ -57,7 +35,6 @@ export default function AdminLayout({ children }) {
                 </div>
               )}
 
-              {/* when sidebar collapsed, place hamburger on top of profile pic */}
               {!open && (
                 <button
                   onClick={() => setOpen(true)}
@@ -68,7 +45,6 @@ export default function AdminLayout({ children }) {
                 </button>
               )}
 
-              {/* plus icon to upload avatar when none */}
               {open && !admin?.avatar?.url && (
                 <button onClick={() => fileRef.current?.click()} className="absolute -bottom-2 right-0 z-30 rounded-full bg-white/20 p-1">
                   <Plus className="w-3 h-3 text-white" />
@@ -103,8 +79,6 @@ export default function AdminLayout({ children }) {
             )}
           </div>
         </div>
-
-        {/* mobile open button moved into the profile area when collapsed */}
 
         <nav className="flex flex-col gap-2">
           <Link href="/admin/dashboard" className={`flex items-center gap-3 rounded px-3 py-2 hover:bg-white/10 ${open ? '' : 'justify-center'}`}>
@@ -149,11 +123,17 @@ export default function AdminLayout({ children }) {
       </aside>
 
       <main className="flex-1 bg-[var(--color-primary)] p-6 text-stone-900 relative">
-        {/* mobile open button moved into the sidebar to sit over profile when collapsed */}
-
         {children}
       </main>
     </div>
+  );
+}
+
+export default function AdminLayout({ children }) {
+  return (
+    <AuthProvider>
+      <AdminLayoutInner>{children}</AdminLayoutInner>
+    </AuthProvider>
   );
 }
 
