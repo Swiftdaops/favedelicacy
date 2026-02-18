@@ -225,7 +225,7 @@ export default function CartDrawer() {
                   </div>
                   <div className="pt-1">
                     <span className="text-xs text-stone-400 uppercase font-black">Account Name</span>
-                    <p className="text-lg font-bold text-stone-900">Favour akudo</p>
+                    <p className="text-lg font-bold text-stone-900">Favour Akudo</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 px-2">
