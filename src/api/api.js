@@ -52,8 +52,11 @@ async function request(method, path, body, options = {}) {
 
     // Handle session expiration (Unauthorized)
     if (res.status === 401 && typeof window !== "undefined") {
-      if (!window.location.pathname.includes("/login")) {
-        window.location.href = "/login";
+      const path = window.location.pathname || "";
+      // Retire `/login`: always redirect to admin login for auth failures
+      const loginRoute = "/admin/login";
+      if (!path.includes("/admin/login") && path !== loginRoute) {
+        window.location.href = loginRoute;
         return null;
       }
     }

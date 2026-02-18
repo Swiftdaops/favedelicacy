@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation"; // Use this instead of window.location
 import {
@@ -19,6 +19,8 @@ import { useSearchStore } from "@/store/search.store";
 
 export default function PublicNavbar() {
   const [open, setOpen] = useState(false);
+  const headerRef = useRef(null);
+  const drawerOpen = useCartStore((s) => s.drawerOpen);
   const pathname = usePathname();
 
   // Hide navbar on admin routes
@@ -31,8 +33,29 @@ export default function PublicNavbar() {
   const toggleDrawer = useCartStore((s) => s.toggleDrawer);
   const openSearch = useSearchStore((s) => s.openSearch);
 
+  useEffect(() => {
+    const el = headerRef.current;
+    if (!el) return;
+
+    if (drawerOpen || open) {
+      // If anything inside header has focus, blur it to avoid aria-hidden conflicts
+      if (document.activeElement && el.contains(document.activeElement)) {
+        document.activeElement.blur();
+      }
+      try {
+        el.setAttribute('inert', '');
+      } catch (e) {
+        // Some older browsers may not support inert; fall back to aria-hidden
+        el.setAttribute('aria-hidden', 'true');
+      }
+    } else {
+      el.removeAttribute('inert');
+      el.removeAttribute('aria-hidden');
+    }
+  }, [drawerOpen, open]);
+
   return (
-    <header className="sticky top-0 z-50 bg-[var(--background)]/70 backdrop-blur border-b border-white/30">
+    <header ref={headerRef} className="sticky top-0 z-50 bg-[var(--background)]/70 backdrop-blur border-b border-white/30">
       <div className="mx-auto max-w-7xl px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Brand */}
@@ -88,7 +111,7 @@ export default function PublicNavbar() {
             </button>
 
             <button 
-              onClick={() => toggleDrawer(true)} 
+              onClick={() => { document.activeElement?.blur(); toggleDrawer(true); }} 
               className="relative rounded-full p-2 hover:bg-red-100 transition"
             >
               <ShoppingBag className="h-5 w-5 text-red-600" />
@@ -111,7 +134,7 @@ export default function PublicNavbar() {
             </button>
 
             <button 
-              onClick={() => toggleDrawer(true)} 
+              onClick={() => { document.activeElement?.blur(); toggleDrawer(true); }} 
               className="relative rounded-full p-2 hover:bg-red-100 transition"
             >
               <ShoppingBag className="h-5 w-5 text-red-600" />
@@ -124,7 +147,7 @@ export default function PublicNavbar() {
 
             <button
               aria-label="Menu"
-              onClick={() => setOpen(true)}
+              onClick={() => { document.activeElement?.blur(); setOpen(true); }}
               className="rounded-full p-2 hover:bg-red-100 transition"
             >
               <Menu className="h-6 w-6 text-red-600" />
