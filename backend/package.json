@@ -9,6 +9,7 @@
 		"dev": "nodemon src/server.js",
 		"seed:admin": "node src/scripts/seedAdmin.js",
 		"seed:food": "node src/scripts/seedFood.js",
+		"clear:food": "node src/scripts/clearFood.js",
 		"seed:drinks": "node src/scripts/seedDrinks.js",
 		"seed:all": "node src/scripts/seedAdmin.js && node src/scripts/seedFood.js && node src/scripts/seedDrinks.js"
 	},
