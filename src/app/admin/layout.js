@@ -1,30 +1,13 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { logoutAdmin, getAdminProfile, uploadAdminAvatar } from "@/api/auth.api";
-import { Grid, Utensils, Coffee, Package, CreditCard, Tag, LogOut, Menu, X, Plus } from "lucide-react";
+import { logoutAdmin, uploadAdminAvatar } from "@/api/auth.api";
+import { Grid, Utensils, Coffee, Package, CreditCard, LogOut, Menu, Plus } from "lucide-react";
+import { AuthProvider, useAuth } from "@/context/AuthProvider";
 
-export default function AdminLayout({ children }) {
-  const [open, setOpen] = useState(true);
-  const [admin, setAdmin] = useState(null);
-  const fileRef = useRef(null);
-  const router = useRouter();
-
-  useEffect(() => {
-    // start collapsed on small screens
-    const handleResize = () => setOpen(window.innerWidth >= 768);
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    import { useState, useRef } from "react";
-  }, []);
-
-    import { logoutAdmin, uploadAdminAvatar } from "@/api/auth.api";
-    import { Grid, Utensils, Coffee, Package, CreditCard, LogOut, Menu, Plus } from "lucide-react";
-    import { AuthProvider, useAuth } from "@/context/AuthProvider";
-
-    function AdminLayoutInner({ children }) {
+function AdminLayoutInner({ children }) {
       const [open, setOpen] = useState(true);
       const fileRef = useRef(null);
       const router = useRouter();

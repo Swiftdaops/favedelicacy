@@ -14,7 +14,7 @@ export default function robots() {
         allow: "/",
 
         // Block all admin pages (including /admin/login) from crawlers
-        disallow: ["/admin", "/admin/", "/admin/*", "/login", "/login/*"],
+        disallow: ["/admin", "/admin/", "/admin/*"],
       },
     ],
     sitemap: `${SITE_URL}/sitemap.xml`,
