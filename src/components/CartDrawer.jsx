@@ -208,15 +208,15 @@ export default function CartDrawer() {
                 <div className="border border-stone-100 rounded-3xl p-6 space-y-5 bg-stone-50 shadow-inner">
                   <div className="flex justify-between items-center border-b border-stone-200 pb-3">
                     <span className="text-xs text-stone-400 uppercase font-black">Bank</span>
-                    <span className="text-lg font-bold text-stone-900">Palmpay</span>
+                    <span className="text-lg font-bold text-stone-900">Moniepoint</span>
                   </div>
                   <div className="flex justify-between items-center border-b border-stone-200 pb-3">
                     <div>
                       <span className="text-xs text-stone-400 uppercase font-black">Account Number</span>
-                      <p className="text-2xl font-mono font-black text-red-600 tracking-tighter">8162084926</p>
+                      <p className="text-2xl font-mono font-black text-red-600 tracking-tighter">7018251100</p>
                     </div>
                     <button
-                      onClick={() => copyToClipboard("8162084926")}
+                      onClick={() => copyToClipboard("7018251100")}
                       className="p-3 bg-white rounded-2xl border border-stone-200 shadow-sm hover:scale-105 active:scale-95 transition-all"
                       aria-label={copied ? "Copied" : "Copy account number"}
                     >
@@ -225,7 +225,7 @@ export default function CartDrawer() {
                   </div>
                   <div className="pt-1">
                     <span className="text-xs text-stone-400 uppercase font-black">Account Name</span>
-                    <p className="text-lg font-bold text-stone-900">OBI TOBECHUKWU FAVOUR</p>
+                    <p className="text-lg font-bold text-stone-900">Favour akudo</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 px-2">
