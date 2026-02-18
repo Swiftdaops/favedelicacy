@@ -9,6 +9,8 @@ export default function EditFoodForm({ food, onClose, onSuccess }) {
   const [description, setDescription] = useState(food.description || "");
   const [files, setFiles] = useState(null);
   const [extras, setExtras] = useState(food.extras || []);
+  const [existingImages, setExistingImages] = useState(food.images || []);
+  const [removedImageIds, setRemovedImageIds] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -23,6 +25,7 @@ export default function EditFoodForm({ food, onClose, onSuccess }) {
       fd.append("price", String(price));
       fd.append("description", description);
       if (extras && extras.length) fd.append("extras", JSON.stringify(extras));
+      if (removedImageIds && removedImageIds.length) fd.append("removeImageIds", JSON.stringify(removedImageIds));
       if (files && files.length) {
         for (let i = 0; i < files.length; i++) fd.append("images", files[i]);
       }
@@ -78,8 +81,22 @@ export default function EditFoodForm({ food, onClose, onSuccess }) {
         </div>
 
         <label className="block mb-4">
-          <span className="text-sm text-stone-950">Images (optional, replace existing)</span>
+          <span className="text-sm text-stone-950">Images (optional, add or remove)</span>
           <input type="file" accept="image/*" multiple onChange={(e) => setFiles(e.target.files)} className="mt-1 block w-full" />
+
+          {existingImages && existingImages.length > 0 && (
+            <div className="grid grid-cols-3 gap-2 mt-3">
+              {existingImages.map((img, i) => (
+                <div key={i} className="relative h-28 overflow-hidden rounded bg-white/5">
+                  <img src={img.url} alt={`img-${i}`} className="w-full h-full object-cover" />
+                  <button type="button" onClick={() => {
+                    setExistingImages((s) => s.filter((_, idx) => idx !== i));
+                    setRemovedImageIds((s) => [...s, img.publicId]);
+                  }} className="absolute top-2 right-2 bg-white/80 p-1 rounded">Remove</button>
+                </div>
+              ))}
+            </div>
+          )}
         </label>
 
         <div className="flex justify-end gap-2">

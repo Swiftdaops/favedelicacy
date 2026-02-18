@@ -1,5 +1,5 @@
 import Food from "../models/food.model.js";
-import { uploadToCloudinary } from "../utils/cloudinaryUpload.js";
+import { uploadToCloudinary, deleteFromCloudinary } from "../utils/cloudinaryUpload.js";
 
 export const getFoods = async (req, res, next) => {
   try {
@@ -50,16 +50,46 @@ export const createFood = async (req, res, next) => {
 
 export const updateFood = async (req, res, next) => {
   try {
+    // Load existing food to manage images safely
+    const food = await Food.findById(req.params.id);
+    if (!food) return res.status(404).json({ message: "Food not found" });
+
     let data = { ...req.body };
 
+    // Handle removal of existing images (expecting JSON string or array of publicIds)
+    let currentImages = Array.isArray(food.images) ? [...food.images] : [];
+    const removeImageIdsRaw = data.removeImageIds || data.removeImages || null;
+    if (removeImageIdsRaw) {
+      let removeIds = [];
+      if (typeof removeImageIdsRaw === "string") {
+        try { removeIds = JSON.parse(removeImageIdsRaw); } catch { removeIds = []; }
+      } else if (Array.isArray(removeImageIdsRaw)) {
+        removeIds = removeImageIdsRaw;
+      }
+
+      for (const pid of removeIds) {
+        try {
+          await deleteFromCloudinary(pid);
+        } catch (err) {
+          console.warn("Failed to delete cloudinary image", pid, err && err.message ? err.message : err);
+        }
+      }
+
+      currentImages = currentImages.filter((img) => !removeIds.includes(img.publicId));
+    }
+
+    // Upload new images (if any) and append to existing images
     if (req.files?.length) {
       try {
-        data.images = await uploadToCloudinary(req.files);
+        const uploaded = await uploadToCloudinary(req.files);
+        currentImages = [...currentImages, ...uploaded];
       } catch (err) {
         console.error("Cloudinary upload failed (update):", err);
         return res.status(500).json({ message: "Image upload failed" });
       }
     }
+
+    data.images = currentImages;
 
     if (data.price) data.price = Number(data.price);
 
@@ -75,7 +105,7 @@ export const updateFood = async (req, res, next) => {
       }
     }
 
-    const food = await Food.findByIdAndUpdate(req.params.id, data, { new: true });
+    const updated = await Food.findByIdAndUpdate(req.params.id, data, { new: true });
     if (!food) return res.status(404).json({ message: "Food not found" });
     res.json(food);
   } catch (err) {
