@@ -28,9 +28,13 @@ export const useCartStore = create((set, get) => ({
           ),
         };
       }
-      return { items: [...state.items, { ...normalized, qty: Number(qty) || 1 }] };
+      return { items: [...state.items, { ...normalized, qty: Number(qty) || 1, selectedExtras: [] }] };
     });
   },
+
+  // Set selected extras for a cart item (array of { name, price })
+  updateExtras: (id, extras = []) =>
+    set((s) => ({ items: s.items.map((i) => ((i._id || i.id) === id ? { ...i, selectedExtras: extras } : i)) })),
 
   removeFromCart: (id) => set((s) => ({ items: s.items.filter((i) => (i._id || i.id) !== id) })),
 
@@ -41,7 +45,12 @@ export const useCartStore = create((set, get) => ({
   toggleDrawer: (open) => set((s) => ({ drawerOpen: typeof open === "boolean" ? open : !s.drawerOpen })),
 
   count: () => get().items.reduce((sum, i) => sum + (i.qty || 0), 0),
-  total: () => get().items.reduce((sum, i) => sum + (i.qty || 0) * (Number(i.price) || 0), 0),
+  total: () =>
+    get().items.reduce((sum, i) => {
+      const base = (i.qty || 0) * (Number(i.price) || 0);
+      const extras = (i.selectedExtras || []).reduce((es, e) => es + (Number(e.price) || 0) * (i.qty || 1), 0);
+      return sum + base + extras;
+    }, 0),
 }));
 
 // persist items to localStorage

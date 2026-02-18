@@ -17,7 +17,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 
 export default function CartDrawer() {
-  const { items, drawerOpen, toggleDrawer, removeFromCart, updateQty, total, clearCart } = useCartStore();
+  const { items, drawerOpen, toggleDrawer, removeFromCart, updateQty, updateExtras, total, clearCart } = useCartStore();
   const [step, setStep] = useState("cart"); // cart, details, payment, success
   const [submitting, setSubmitting] = useState(false);
   const [orderId, setOrderId] = useState(null);
@@ -72,7 +72,8 @@ export default function CartDrawer() {
           food: it._id || it.id, 
           name: it.name, 
           price: Number(it.price), 
-          quantity: it.qty || 1 
+          quantity: it.qty || 1,
+          extras: (it.selectedExtras || []).map(s => ({ name: s.name, price: Number(s.price) }))
         })),
         totalAmount: total(),
       };
@@ -171,6 +172,32 @@ export default function CartDrawer() {
                         <div className="flex-1 min-w-0">
                           <h4 className="font-bold text-stone-900 truncate">{it.name}</h4>
                           <p className="text-sm font-bold text-red-600">₦{Number(it.price).toLocaleString()}</p>
+                          {/* Extras selection preview */}
+                          {it.extras && it.extras.length > 0 && (
+                            <div className="mt-2 text-sm text-stone-700">
+                              <details className="group">
+                                <summary className="cursor-pointer select-none">Add-ons ({(it.selectedExtras||[]).length})</summary>
+                                <div className="mt-2 space-y-2">
+                                  {it.extras.map((ex, idx) => {
+                                    const checked = (it.selectedExtras || []).some(se => se.name === ex.name && Number(se.price) === Number(ex.price));
+                                    return (
+                                      <label key={idx} className="flex items-center gap-2">
+                                        <input type="checkbox" checked={checked} onChange={(e) => {
+                                          const current = it.selectedExtras || [];
+                                          if (e.target.checked) {
+                                            updateExtras(it._id || it.id, [...current, { name: ex.name, price: ex.price }]);
+                                          } else {
+                                            updateExtras(it._id || it.id, current.filter(c => !(c.name === ex.name && Number(c.price) === Number(ex.price))));
+                                          }
+                                        }} />
+                                        <span className="flex-1">{ex.name} <span className="text-stone-500">₦{ex.price}</span></span>
+                                      </label>
+                                    )
+                                  })}
+                                </div>
+                              </details>
+                            </div>
+                          )}
                           <div className="flex items-center justify-between mt-2">
                             <div className="flex items-center border border-stone-200 rounded-lg bg-white overflow-hidden">
                               <button onClick={() => updateQty(it._id || it.id, Math.max(1, (it.qty || 1) - 1))} className="p-1.5 hover:bg-stone-50"><Minus size={14}/></button>
