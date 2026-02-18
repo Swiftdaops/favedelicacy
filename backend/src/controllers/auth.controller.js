@@ -37,6 +37,7 @@ export const login = async (req, res, next) => {
       httpOnly: true,
       secure: isProd,
       sameSite: isProd ? "none" : "lax",
+      path: "/",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     };
 
@@ -53,6 +54,7 @@ export const logout = (req, res) => {
   res.clearCookie("token", {
     secure: isProd,
     sameSite: isProd ? "none" : "lax",
+    path: "/",
   });
   res.json({ message: "Logged out" });
 };
