@@ -10,12 +10,12 @@ import routes from './routes.js';
 
 const app = express();
 
-// When running behind a proxy (e.g., Render, Heroku), express needs to
-// trust the proxy to correctly read the client IP from `X-Forwarded-For`.
-// This is required for express-rate-limit to work without ERR_ERL_UNEXPECTED_X_FORWARDED_FOR.
-if (process.env.TRUST_PROXY !== 'false') {
-  app.set('trust proxy', process.env.TRUST_PROXY || 1);
-}
+// When running behind a proxy (e.g., Render, Heroku, Vercel), express must
+// trust the proxy so it correctly reads the client IP from `X-Forwarded-For`.
+// This is required for `express-rate-limit` and other middleware to see
+// the real client IP instead of the proxy's address.
+// Explicitly trust the first proxy.
+app.set('trust proxy', 1);
 
 // --- Debugging (Optional: Remove after testing) ---
 console.log("✅ Env Loaded. Cloudinary Key exists:", !!process.env.CLOUDINARY_API_KEY);
