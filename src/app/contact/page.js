@@ -74,16 +74,7 @@ export default function ContactPage() {
             <input name="email" value={form.email} onChange={handleChange} className="mt-1 w-full rounded border p-2" />
           </div>
 
-          <div>
-            <label className="block text-sm text-stone-700">CID (optional)</label>
-            <input
-              name="cid"
-              value={form.cid}
-              onChange={handleChange}
-              className="mt-1 w-full rounded border p-2"
-              placeholder="Customer ID"
-            />
-          </div>
+          {/* CID is generated server-side; do not collect from users */}
 
           <div>
             <label className="block text-sm text-stone-700">Message</label>
