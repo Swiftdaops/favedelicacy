@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import Customer from "../models/customer.model.js";
 import Order from "../models/order.model.js";
+import { resolveCustomer } from "../services/customer.service.js";
 
 const VIP_THRESHOLD_NGN = 20000;
 
