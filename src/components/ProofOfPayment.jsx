@@ -53,7 +53,7 @@ export default function ProofOfPayment({ orderId }) {
     return (
       <div className="rounded-lg p-6 bg-white text-stone-950 text-center">
         <h3 className="text-xl font-semibold">Thank you — payment received</h3>
-        <p className="mt-2 text-sm">We've saved your payment proof. Your order will be completed once verified.</p>
+        <p className="mt-2 text-sm">We&apos;ve saved your payment proof. Your order will be completed once verified.</p>
       </div>
     );
   }

@@ -10,7 +10,14 @@ export default function EditDrinkForm({ initial, onClose, onSaved }) {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (initial) setForm({ name: initial.name || "", price: initial.price || "", description: initial.description || "" });
+    if (initial) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setForm({
+        name: initial.name || "",
+        price: initial.price || "",
+        description: initial.description || "",
+      });
+    }
   }, [initial]);
 
   function handleChange(e) {

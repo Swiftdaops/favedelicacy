@@ -21,6 +21,7 @@ export default function PublicNavbar() {
   const headerRef = useRef(null);
 
   const pathname = usePathname();
+  const hideNavbar = pathname?.startsWith("/admin");
   const drawerOpen = useCartStore((s) => s.drawerOpen);
   const cartCount = useCartStore((s) =>
     s.items.reduce((sum, i) => sum + (i.qty || 0), 0)
@@ -28,16 +29,12 @@ export default function PublicNavbar() {
   const toggleDrawer = useCartStore((s) => s.toggleDrawer);
   const openSearch = useSearchStore((s) => s.openSearch);
 
-  // Hide navbar on admin routes
-  if (pathname?.startsWith("/admin")) {
-    return null;
-  }
-
   /**
    * Lock body scroll when any overlay is open
    * This replaces the broken `inert` implementation.
    */
   useEffect(() => {
+    if (hideNavbar) return;
     if (drawerOpen || open) {
       document.body.style.overflow = "hidden";
     } else {
@@ -47,7 +44,12 @@ export default function PublicNavbar() {
     return () => {
       document.body.style.overflow = "";
     };
-  }, [drawerOpen, open]);
+  }, [drawerOpen, open, hideNavbar]);
+
+  // Hide navbar on admin routes
+  if (hideNavbar) {
+    return null;
+  }
 
   return (
     <header

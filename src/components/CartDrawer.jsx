@@ -381,7 +381,7 @@ export default function CartDrawer() {
                 </div>
                 <div className="flex items-center gap-2 px-2">
                    <div className="h-2 w-2 rounded-full bg-red-600 animate-pulse" />
-                   <p className="text-xs text-stone-500 font-medium italic">Click "I Have Paid" only after completing the transfer.</p>
+                   <p className="text-xs text-stone-500 font-medium italic">Click &quot;I Have Paid&quot; only after completing the transfer.</p>
                 </div>
               </div>
             )}

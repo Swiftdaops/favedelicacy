@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   Pizza,
   Hamburger,
@@ -49,9 +50,9 @@ export default function Hero() {
 
           {/* CTA */}
           <div className="mt-10 flex gap-4">
-            <a href="/menu" className="inline-block rounded-xl card px-6 py-3 text-white font-semibold shadow-lg transition text-center">
+            <Link href="/menu" className="inline-block rounded-xl card px-6 py-3 text-white font-semibold shadow-lg transition text-center">
               Order Now
-            </a>
+            </Link>
 
           </div>
         </div>

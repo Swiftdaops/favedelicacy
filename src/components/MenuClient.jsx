@@ -10,18 +10,20 @@ export default function MenuClient() {
   const addToCart = useCartStore((s) => s.addToCart);
 
   useEffect(() => {
-    loadFoods();
+    let mounted = true;
+    (async () => {
+      try {
+        const res = await getFoods();
+        const data = res?.data || res || [];
+        if (mounted) setFoods(data);
+      } catch (err) {
+        console.error(err);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
   }, []);
-
-  async function loadFoods() {
-    try {
-      const res = await getFoods();
-      const data = res?.data || res || [];
-      setFoods(data);
-    } catch (err) {
-      console.error(err);
-    }
-  }
 
   return (
     <section className="min-h-screen site-bg text-stone-950 py-16 px-4">

@@ -1,5 +1,7 @@
 "use client";
 
+/* eslint-disable react-hooks/set-state-in-effect */
+
 import { useEffect, useState } from "react";
 import AddDrinkButton from "@/components/AddDrinkButton";
 import EditDrinkForm from "@/components/EditDrinkForm";

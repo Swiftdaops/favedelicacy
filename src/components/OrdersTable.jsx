@@ -38,7 +38,9 @@ export default function OrdersTable({ orders = [], onToggleDelivered = () => {},
                   {o.status}
                 </span>
               </td>
-              <td className="px-4 py-3 text-sm text-stone-600 truncate">{new Date(o.createdAt || o.created || Date.now()).toLocaleString()}</td>
+              <td className="px-4 py-3 text-sm text-stone-600 truncate">
+                {o.createdAt || o.created ? new Date(o.createdAt || o.created).toLocaleString() : "—"}
+              </td>
               <td className="px-4 py-3 text-sm flex items-center gap-2 whitespace-nowrap">
                 {pendingActions[o._id] ? (
                   <div className="flex items-center gap-2">

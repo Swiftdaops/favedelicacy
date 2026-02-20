@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function FinalCTA() {
   return (
     <section className="p-10 site-bg text-center">
@@ -5,9 +7,9 @@ export default function FinalCTA() {
         Hungry Already?
       </h2>
       
-      <a href="/menu" className="px-10 py-4 card rounded-full text-lg font-semibold inline-block">
+      <Link href="/menu" className="px-10 py-4 card rounded-full text-lg font-semibold inline-block">
         Order Now
-      </a>
+      </Link>
     </section>
   );
 }

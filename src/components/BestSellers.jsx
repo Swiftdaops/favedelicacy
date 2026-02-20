@@ -3,6 +3,7 @@
 import { Swiper, SwiperSlide } from "swiper/react";
 import { motion } from "framer-motion";
 import { ShoppingCart } from "lucide-react";
+import Link from "next/link";
 import useCartStore from "@/store/cartStore";
 import "swiper/css";
 import { useEffect, useState } from "react";
@@ -65,7 +66,9 @@ export default function BestSellers() {
         )}
 
         <div className="mt-6 text-center">
-          <a href="/menu" className="card px-6 py-2 rounded inline-block">View Full Menu</a>
+          <Link href="/menu" className="card px-6 py-2 rounded inline-block">
+            View Full Menu
+          </Link>
         </div>
       </div>
     </section>

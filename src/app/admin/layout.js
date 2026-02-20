@@ -37,8 +37,12 @@ function AdminLayoutInner({ children }) {
 
   useEffect(() => {
     if (isLoginRoute) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setNowTs(Date.now());
-    const t = setInterval(() => setNowTs(Date.now()), 1000);
+    const t = setInterval(() => {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setNowTs(Date.now());
+    }, 1000);
     return () => clearInterval(t);
   }, [isLoginRoute]);
 

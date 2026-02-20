@@ -2,6 +2,7 @@
 
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
+import Link from "next/link";
 import {
   ChefHat,
   Truck,
@@ -113,7 +114,9 @@ export default function WhyChooseUs() {
           })}
         </div>
         <div className="mt-8 text-center">
-          <a href="/menu" className="card px-6 py-2 rounded inline-block">Order Now</a>
+          <Link href="/menu" className="card px-6 py-2 rounded inline-block">
+            Order Now
+          </Link>
         </div>
       </div>
     </section>
