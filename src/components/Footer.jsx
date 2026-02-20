@@ -54,8 +54,9 @@ export default function Footer() {
             </h3>
             <address className="not-italic text-sm text-stone-950/90 space-y-2">
               <p>Ifite, Awka, Anambra State</p>
-              <p>Phone: <span className="font-medium">+234 XXX XXX XXXX</span></p>
-              <p>Email: <span className="font-medium">orders@favedelicacy.com</span></p>
+              <p>Phone: <span className="font-medium">+234 701 825 1100</span></p>
+              <p>Email: <span className="font-medium">delicious@favedelicacy.store
+</span></p>
               <p className="mt-2">
                 Open daily from <strong>9am – 9pm</strong>
               </p>
@@ -84,8 +85,8 @@ export default function Footer() {
           </p>
 
           <nav aria-label="Footer links" className="flex gap-4 text-xs text-stone-950/80">
-            <a href="/privacy" className="hover:underline">Privacy Policy</a>
-            <a href="/terms" className="hover:underline">Terms of Service</a>
+            <a  className="hover:underline">Privacy Policy</a>
+            <a  className="hover:underline">Terms of Service</a>
             <a href="/contact" className="hover:underline">Contact</a>
           </nav>
         </div>
