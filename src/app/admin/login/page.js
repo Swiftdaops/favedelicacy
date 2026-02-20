@@ -27,6 +27,14 @@ export default function AdminLogin() {
         const list = orders?.data || orders || [];
         const pending = list.filter((o) => o.status === "pending").length;
         if (pending > 0) toast(`You have ${pending} new order${pending > 1 ? 's' : ''}`);
+        // Broadcast the updated pending count to other admin tabs immediately
+        try {
+          const ch = new BroadcastChannel('admin-orders');
+          ch.postMessage({ type: 'orders-updated', pendingCount: pending });
+          ch.close();
+        } catch (e) {
+          try { localStorage.setItem('admin_orders_updated', JSON.stringify({ ts: Date.now(), pendingCount: pending })); } catch (e) {}
+        }
       } catch (e) {
         // ignore order fetch errors here
       }
@@ -43,7 +51,7 @@ export default function AdminLogin() {
     <div className="min-h-screen flex items-center justify-center">
       <form
         onSubmit={submit}
-        className="w-full max-w-md rounded-md bg-[var(--color-primary)] p-8 shadow text-stone-950"
+        className="w-full max-w-md rounded-md bg-(--color-primary) p-8 shadow text-stone-950"
       >
         <h2 className="mb-6 text-2xl font-semibold">Admin Login</h2>
 

@@ -43,6 +43,19 @@ export const verifyPayment = async (req, res, next) => {
   }
 };
 
+export const unverifyPayment = async (req, res, next) => {
+  try {
+    const payment = await Payment.findByIdAndUpdate(
+      req.params.id,
+      { verified: false },
+      { new: true }
+    );
+    res.json(payment);
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const deletePayment = async (req, res, next) => {
   try {
     const payment = await Payment.findById(req.params.id);

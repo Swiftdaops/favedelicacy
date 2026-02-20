@@ -88,7 +88,7 @@ export default function ProofOfPayment({ orderId }) {
 
             <div className="flex gap-2 justify-end">
               <button type="button" onClick={() => setOpen(false)} className="px-4 py-2 rounded bg-white/10 text-stone-950">Cancel</button>
-              <button type="submit" disabled={loading} className="px-6 py-3 rounded bg-[var(--color-primary)] text-stone-950 font-semibold">{loading ? "Uploading..." : "Upload proof"}</button>
+              <button type="submit" disabled={loading} className="px-6 py-3 rounded bg-(--color-primary) text-stone-950 font-semibold">{loading ? "Uploading..." : "Upload proof"}</button>
             </div>
           </div>
         </form>

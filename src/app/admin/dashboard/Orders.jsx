@@ -141,14 +141,14 @@ export default function Orders() {
         </div>
 
         {/* Mobile cards */}
-          <div className="block md:hidden grid grid-cols-1 gap-4">
+          <div className="md:hidden grid grid-cols-1 gap-4">
           {orders.map((o) => (
             <div key={o._id} className="bg-white border rounded-lg p-4 shadow-sm overflow-hidden">
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-3">
                   <h3 className="font-bold text-stone-900 truncate min-w-0">Order {o._id}</h3>
-                  <span className={`text-xs font-semibold px-2 py-1 rounded flex-shrink-0 whitespace-nowrap ${o.status === 'delivered' ? 'bg-lime-100 text-lime-700' : 'bg-yellow-50 text-yellow-800'}`}>
+                  <span className={`text-xs font-semibold px-2 py-1 rounded shrink-0 whitespace-nowrap ${o.status === 'delivered' ? 'bg-lime-100 text-lime-700' : 'bg-yellow-50 text-yellow-800'}`}>
                     {o.status}
                   </span>
                 </div>

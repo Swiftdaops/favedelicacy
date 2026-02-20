@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getPayments, verifyPayment, deletePayment } from "@/api/payment.api";
+import { getPayments, verifyPayment, unverifyPayment, deletePayment } from "@/api/payment.api";
 import { updateOrderStatus, getOrders } from "@/api/order.api";
 import { toast } from "sonner";
 import { RotateCcw } from "lucide-react";
@@ -10,6 +10,12 @@ export default function Payments() {
   const [payments, setPayments] = useState([]);
   const [loadingIds, setLoadingIds] = useState({});
   const [pendingActions, setPendingActions] = useState({});
+
+  async function refreshPayments(signal) {
+    const res = await getPayments(signal ? { signal } : undefined);
+    setPayments(res || []);
+    return res;
+  }
 
   useEffect(() => {
     let mounted = true;
@@ -32,6 +38,8 @@ export default function Payments() {
 
   // Optimistic verify with undo window
   function verify(id) {
+    const existing = payments.find((p) => p._id === id);
+    if (existing?.verified) return;
     // apply optimistic change
     setPayments((s) => s.map(p => p._id === id ? { ...p, verified: true } : p));
     // schedule actual API call
@@ -40,6 +48,7 @@ export default function Payments() {
       try {
         await verifyPayment(id);
         toast.success("Payment verified");
+        try { await refreshPayments(); } catch (e) {}
         try {
           const orders = await getOrders();
           const pending = (orders || []).filter(o => o.status === 'pending').length;
@@ -69,7 +78,44 @@ export default function Payments() {
     toast.success('Verification scheduled', { action: { label: 'Undo', onClick: () => undoPending(id) } });
   }
 
+  // Optimistic unverify with undo window
+  function unverify(id) {
+    const existing = payments.find((p) => p._id === id);
+    if (!existing?.verified) return;
+
+    setPayments((s) => s.map(p => p._id === id ? { ...p, verified: false } : p));
+    const timer = setTimeout(async () => {
+      setLoadingIds((s) => ({ ...s, [id]: true }));
+      try {
+        await unverifyPayment(id);
+        toast.success("Verification undone");
+        try { await refreshPayments(); } catch (e) {}
+      } catch (err) {
+        console.error(err);
+        toast.error(err?.message || "Undo verify failed");
+        setPayments((s) => s.map(p => p._id === id ? { ...p, verified: true } : p));
+      } finally {
+        setLoadingIds((s) => {
+          const copy = { ...s };
+          delete copy[id];
+          return copy;
+        });
+        setPendingActions((s) => {
+          const copy = { ...s };
+          delete copy[id];
+          return copy;
+        });
+      }
+    }, 5000);
+
+    setPendingActions((s) => ({ ...s, [id]: { timer, type: 'unverify' } }));
+    toast.success('Undo verification scheduled', { action: { label: 'Undo', onClick: () => undoPending(id) } });
+  }
+
   function markOrderPaid(orderId) {
+    // if already paid, use the undo action
+    const existing = payments.find((p) => p.order && p.order._id === orderId);
+    if (existing?.order?.status === 'paid') return;
     // optimistic: mark related payment.order.paid? We'll mark order.status if present
     setPayments((s) => s.map(p => p.order && p.order._id === orderId ? { ...p, order: { ...p.order, status: 'paid' } } : p));
     const key = `order-${orderId}`;
@@ -78,6 +124,7 @@ export default function Payments() {
       try {
         await updateOrderStatus(orderId, "paid");
         toast.success("Order marked paid");
+        try { await refreshPayments(); } catch (e) {}
           try {
             const orders = await getOrders();
             const pending = (orders || []).filter(o => o.status === 'pending').length;
@@ -105,6 +152,41 @@ export default function Payments() {
     }, 5000);
     setPendingActions((s) => ({ ...s, [key]: { timer, type: 'markPaid', orderId } }));
     toast.success('Mark paid scheduled', { action: { label: 'Undo', onClick: () => undoPending(key) } });
+  }
+
+  function undoMarkOrderPaid(orderId) {
+    const existing = payments.find((p) => p.order && p.order._id === orderId);
+    if (!existing?.order) return;
+    if (existing.order.status !== 'paid') return;
+
+    setPayments((s) => s.map(p => p.order && p.order._id === orderId ? { ...p, order: { ...p.order, status: 'pending' } } : p));
+    const key = `order-${orderId}-undo`;
+    const timer = setTimeout(async () => {
+      setLoadingIds((s) => ({ ...s, [orderId]: true }));
+      try {
+        await updateOrderStatus(orderId, "pending");
+        toast.success("Order payment status undone");
+        try { await refreshPayments(); } catch (e) {}
+      } catch (err) {
+        console.error(err);
+        toast.error(err?.message || "Undo mark paid failed");
+        try { await refreshPayments(); } catch (e) {}
+      } finally {
+        setLoadingIds((s) => {
+          const copy = { ...s };
+          delete copy[orderId];
+          return copy;
+        });
+        setPendingActions((s) => {
+          const copy = { ...s };
+          delete copy[key];
+          return copy;
+        });
+      }
+    }, 5000);
+
+    setPendingActions((s) => ({ ...s, [key]: { timer, type: 'undoMarkPaid', orderId } }));
+    toast.success('Undo mark paid scheduled', { action: { label: 'Undo', onClick: () => undoPending(key) } });
   }
 
   function handleDelete(id) {
@@ -151,9 +233,14 @@ export default function Payments() {
     // revert optimistic UI
     if (action.type === 'verify') {
       setPayments((s) => s.map(p => p._id === key ? { ...p, verified: false } : p));
+    } else if (action.type === 'unverify') {
+      setPayments((s) => s.map(p => p._id === key ? { ...p, verified: true } : p));
     } else if (action.type === 'markPaid') {
       const orderId = action.orderId;
       setPayments((s) => s.map(p => p.order && p.order._id === orderId ? { ...p, order: { ...p.order, status: 'pending' } } : p));
+    } else if (action.type === 'undoMarkPaid') {
+      const orderId = action.orderId;
+      setPayments((s) => s.map(p => p.order && p.order._id === orderId ? { ...p, order: { ...p.order, status: 'paid' } } : p));
     } else if (action.type === 'delete') {
       setPayments(action.prev);
     }
@@ -185,7 +272,7 @@ export default function Payments() {
         {payments.map((p) => (
           <div key={p._id} className="bg-white rounded-lg p-4 shadow-sm flex flex-col">
             <div className="flex items-start gap-4">
-              <div className="w-20 md:w-24 flex-shrink-0">
+              <div className="w-20 md:w-24 shrink-0">
                 {p.proof?.url ? (
                   <img src={p.proof.url} alt="proof" className="w-20 h-20 md:w-24 md:h-24 object-cover rounded-md" />
                 ) : (
@@ -200,7 +287,7 @@ export default function Payments() {
                     <div className="text-sm text-stone-600 truncate">Customer: {p.customerName || '—'}</div>
                     <div className="text-sm text-stone-600">Amount: ₦{Number(p.amount || 0).toLocaleString()}</div>
                   </div>
-                  <div className="text-right flex-shrink-0">
+                  <div className="text-right shrink-0">
                     <div className={`px-2 py-1 rounded text-xs font-semibold ${p.verified ? 'bg-lime-100 text-lime-700' : 'bg-yellow-50 text-yellow-800'}`}>
                       {p.verified ? 'Verified' : 'Unverified'}
                     </div>
@@ -237,8 +324,17 @@ export default function Payments() {
             </div>
 
             <div className="mt-3 flex flex-col sm:flex-row items-center sm:justify-end gap-2">
-              <button disabled={!!loadingIds[p._id]} onClick={() => verify(p._id)} className="px-3 py-2 bg-stone-900 text-white rounded-md text-sm w-full sm:w-auto">{loadingIds[p._id] ? 'Verifying...' : 'Verify Proof'}</button>
-              {p.order && <button disabled={!!loadingIds[p.order._id]} onClick={() => markOrderPaid(p.order._id)} className="px-3 py-2 bg-lime-600 text-white rounded-md text-sm w-full sm:w-auto">{loadingIds[p.order._id] ? 'Processing...' : 'Mark Order Paid'}</button>}
+              {!p.verified ? (
+                <button disabled={!!loadingIds[p._id]} onClick={() => verify(p._id)} className="px-3 py-2 bg-stone-900 text-white rounded-md text-sm w-full sm:w-auto">{loadingIds[p._id] ? 'Verifying...' : 'Verify Proof'}</button>
+              ) : (
+                <button disabled={!!loadingIds[p._id]} onClick={() => unverify(p._id)} className="px-3 py-2 bg-yellow-600 text-white rounded-md text-sm w-full sm:w-auto">{loadingIds[p._id] ? 'Working...' : 'Undo Verify'}</button>
+              )}
+
+              {p.order && (p.order.status !== 'paid' ? (
+                <button disabled={!!loadingIds[p.order._id]} onClick={() => markOrderPaid(p.order._id)} className="px-3 py-2 bg-lime-600 text-white rounded-md text-sm w-full sm:w-auto">{loadingIds[p.order._id] ? 'Processing...' : 'Mark Order Paid'}</button>
+              ) : (
+                <button disabled={!!loadingIds[p.order._id]} onClick={() => undoMarkOrderPaid(p.order._id)} className="px-3 py-2 bg-yellow-600 text-white rounded-md text-sm w-full sm:w-auto">{loadingIds[p.order._id] ? 'Working...' : 'Undo Mark Paid'}</button>
+              ))}
               <button onClick={() => shareWhatsApp(p)} className="px-3 py-2 bg-green-600 text-white rounded-md text-sm w-full sm:w-auto">Share WhatsApp</button>
               <button disabled={!!loadingIds[p._id]} onClick={() => handleDelete(p._id)} className="px-3 py-2 bg-red-600 text-white rounded-md text-sm w-full sm:w-auto">{loadingIds[p._id] ? (<><RotateCcw size={14}/> Deleting...</>) : 'Delete'}</button>
             </div>

@@ -52,7 +52,7 @@ export default function PublicNavbar() {
   return (
     <header
       ref={headerRef}
-      className="sticky top-0 z-50 bg-[var(--background)]/70 backdrop-blur border-b border-white/30"
+      className="sticky top-0 z-50 bg-(--background)/70 backdrop-blur border-b border-white/30"
     >
       <div className="mx-auto max-w-7xl px-4">
         <div className="flex h-16 items-center justify-between">
@@ -156,7 +156,7 @@ export default function PublicNavbar() {
 
       {/* Mobile Menu Drawer */}
       {open && (
-        <div className="fixed inset-0 z-[60]">
+        <div className="fixed inset-0 z-60">
           {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/40"

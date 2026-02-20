@@ -157,7 +157,7 @@ export default function CartDrawer() {
   return (
     <Drawer open={drawerOpen} onOpenChange={(v) => toggleDrawer(!!v)}>
       <DrawerContent className="max-h-[96vh] outline-none">
-        <div className="mx-auto w-full max-w-lg overflow-hidden flex flex-col h-full text-stone-900 bg-white rounded-t-[20px]">
+        <div className="mx-auto w-full max-w-lg overflow-hidden flex flex-col h-full text-stone-900 bg-white rounded-t-4xl">
           
           <DrawerHeader className="flex flex-row items-center justify-between border-b pb-4 px-6">
             <div className="flex-1">
@@ -418,7 +418,7 @@ export default function CartDrawer() {
               <div className="flex gap-3">
                 <button 
                   onClick={handleDetailsNext} 
-                  className="flex-[2] bg-red-600 text-white font-black py-5 rounded-2xl shadow-lg disabled:opacity-50 active:scale-[0.98] transition-all"
+                  className="flex-2 bg-red-600 text-white font-black py-5 rounded-2xl shadow-lg disabled:opacity-50 active:scale-[0.98] transition-all"
                 >
                   Next: Add-ons
                 </button>
@@ -435,7 +435,7 @@ export default function CartDrawer() {
               <div className="flex gap-3">
                 <button 
                   onClick={() => setStep("drinks")} 
-                  className="flex-[2] bg-red-600 text-white font-black py-5 rounded-2xl shadow-lg active:scale-[0.98] transition-all"
+                  className="flex-2 bg-red-600 text-white font-black py-5 rounded-2xl shadow-lg active:scale-[0.98] transition-all"
                 >
                   Next: Drinks
                 </button>
@@ -453,7 +453,7 @@ export default function CartDrawer() {
                 <button 
                   onClick={handleOrderSubmit} 
                   disabled={submitting} 
-                  className="flex-[2] bg-red-600 text-white font-black py-5 rounded-2xl shadow-lg disabled:opacity-50 active:scale-[0.98] transition-all"
+                  className="flex-2 bg-red-600 text-white font-black py-5 rounded-2xl shadow-lg disabled:opacity-50 active:scale-[0.98] transition-all"
                 >
                   {submitting ? "Processing..." : "Next: Payment"}
                 </button>
@@ -480,7 +480,7 @@ export default function CartDrawer() {
                 <button 
                   onClick={handleUploadConfirm} 
                   disabled={uploading} 
-                  className="flex-[2] bg-red-600 text-white font-black py-5 rounded-2xl shadow-lg disabled:opacity-50 active:scale-[0.98] transition-all"
+                  className="flex-2 bg-red-600 text-white font-black py-5 rounded-2xl shadow-lg disabled:opacity-50 active:scale-[0.98] transition-all"
                 >
                   {uploading ? "Uploading..." : "Upload & Confirm"}
                 </button>

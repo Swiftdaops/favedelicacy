@@ -48,7 +48,7 @@ export default function EditFoodForm({ food, onClose, onSuccess }) {
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
       <form
         onSubmit={submit}
-        className="relative w-full max-w-lg rounded-lg bg-[var(--background)] p-4 sm:p-6 text-stone-950 z-10 max-h-[90vh] overflow-y-auto"
+        className="relative w-full max-w-lg rounded-lg bg-background p-4 sm:p-6 text-stone-950 z-10 max-h-[90vh] overflow-y-auto"
       >
         <h3 className="text-lg font-semibold mb-4 text-stone-950">Edit Food</h3>
 
@@ -104,7 +104,7 @@ export default function EditFoodForm({ food, onClose, onSuccess }) {
 
         <div className="flex justify-end gap-2">
           <button type="button" onClick={onClose} className="px-4 py-2 rounded bg-white/10 text-stone-950">Cancel</button>
-          <button type="submit" disabled={loading} className="px-4 py-2 rounded bg-[var(--color-primary)] text-stone-950">
+          <button type="submit" disabled={loading} className="px-4 py-2 rounded bg-(--color-primary) text-stone-950">
             {loading ? "Saving..." : "Save"}
           </button>
         </div>

@@ -47,7 +47,7 @@ export default function BestSellers() {
             {foods.map((food) => (
               <SwiperSlide key={food._id}>
                 <motion.div whileHover={{ y: -6 }} className="glass glass-red rounded-2xl overflow-hidden">
-                  <img src={food.images?.[0]?.url || food.image} alt={food.name} className="w-full h-[420px] md:h-[320px] object-cover rounded-xl" />
+                  <img src={food.images?.[0]?.url || food.image} alt={food.name} className="w-full h-105 md:h-80 object-cover rounded-xl" />
 
                   <div className="p-4">
                     <h3 className="text-lg font-semibold">{food.name}</h3>
