@@ -17,8 +17,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 
 export default function CartDrawer() {
-  const { items, drawerOpen, toggleDrawer, removeFromCart, updateQty, updateExtras, total, clearCart } = useCartStore();
-  const [step, setStep] = useState("cart"); // cart, details, payment, success
+  const { items, drawerOpen, toggleDrawer, removeFromCart, updateQty, updateExtras, addToCart, total, clearCart } = useCartStore();
+  const [step, setStep] = useState("cart"); // cart, details, addons, drinks, payment, upload, success
   const [submitting, setSubmitting] = useState(false);
   const [orderId, setOrderId] = useState(null);
   const [proofFiles, setProofFiles] = useState([]);
@@ -27,6 +27,8 @@ export default function CartDrawer() {
   const firstFocusable = useRef(null);
   const fileInputRef = useRef(null);
   const [copied, setCopied] = useState(false);
+  const [availableDrinks, setAvailableDrinks] = useState([]);
+  const [loadingDrinks, setLoadingDrinks] = useState(false);
 
   // Focus management: Pull focus into the drawer immediately to avoid ARIA-hidden errors
   useEffect(() => {
@@ -61,9 +63,8 @@ export default function CartDrawer() {
   };
 
   const handleOrderSubmit = async (e) => {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
     if (!form.customerName || !form.customerPhone) return toast.error("Please provide name and phone");
-    
     setSubmitting(true);
     try {
       const payload = {
@@ -87,6 +88,31 @@ export default function CartDrawer() {
       setSubmitting(false);
     }
   };
+
+  function handleDetailsNext(e) {
+    e?.preventDefault?.();
+    if (!form.customerName || !form.customerPhone) return toast.error("Please provide name and phone");
+    setStep("addons");
+  }
+
+  useEffect(() => {
+    if (step === "drinks") {
+      const load = async () => {
+        setLoadingDrinks(true);
+        try {
+          const apiBase = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
+          const res = await fetch(`${apiBase}/api/drinks?all=true`);
+          const data = (await res.json()) || [];
+          setAvailableDrinks(data);
+        } catch (err) {
+          setAvailableDrinks([]);
+        } finally {
+          setLoadingDrinks(false);
+        }
+      };
+      load();
+    }
+  }, [step]);
 
   function handleFileChange(e) {
     const file = e.target.files?.[0];
@@ -172,32 +198,7 @@ export default function CartDrawer() {
                         <div className="flex-1 min-w-0">
                           <h4 className="font-bold text-stone-900 truncate">{it.name}</h4>
                           <p className="text-sm font-bold text-red-600">₦{Number(it.price).toLocaleString()}</p>
-                          {/* Extras selection preview */}
-                          {it.extras && it.extras.length > 0 && (
-                            <div className="mt-2 text-sm text-stone-700">
-                              <details className="group">
-                                <summary className="cursor-pointer select-none">Add-ons ({(it.selectedExtras||[]).length})</summary>
-                                <div className="mt-2 space-y-2">
-                                  {it.extras.map((ex, idx) => {
-                                    const checked = (it.selectedExtras || []).some(se => se.name === ex.name && Number(se.price) === Number(ex.price));
-                                    return (
-                                      <label key={idx} className="flex items-center gap-2">
-                                        <input type="checkbox" checked={checked} onChange={(e) => {
-                                          const current = it.selectedExtras || [];
-                                          if (e.target.checked) {
-                                            updateExtras(it._id || it.id, [...current, { name: ex.name, price: ex.price }]);
-                                          } else {
-                                            updateExtras(it._id || it.id, current.filter(c => !(c.name === ex.name && Number(c.price) === Number(ex.price))));
-                                          }
-                                        }} />
-                                        <span className="flex-1">{ex.name} <span className="text-stone-500">₦{ex.price}</span></span>
-                                      </label>
-                                    )
-                                  })}
-                                </div>
-                              </details>
-                            </div>
-                          )}
+                          {/* Extras are selectable in the Add-ons step after details */}
                           <div className="flex items-center justify-between mt-2">
                             <div className="flex items-center border border-stone-200 rounded-lg bg-white overflow-hidden">
                               <button onClick={() => updateQty(it._id || it.id, Math.max(1, (it.qty || 1) - 1))} className="p-1.5 hover:bg-stone-50"><Minus size={14}/></button>
@@ -223,6 +224,78 @@ export default function CartDrawer() {
                   <textarea value={form.deliveryAddress} onChange={e => setForm({...form, deliveryAddress: e.target.value})} placeholder="Detailed Delivery Address (Optional)" className="w-full p-4 rounded-xl border border-stone-200 outline-none focus:ring-2 focus:ring-red-600 transition-all font-medium resize-none" rows={3} />
                 </div>
               </motion.div>
+            )}
+
+            {step === "addons" && (
+              <div className="space-y-4 py-2">
+                <h3 className="font-black text-xl text-stone-900">Add-ons</h3>
+                <p className="text-sm text-stone-500">Choose extras for each food item below.</p>
+                <div className="space-y-3 mt-3">
+                  {items.map((it) => (
+                    <div key={it._id || it.id} className="p-3 border border-stone-100 rounded-2xl bg-stone-50">
+                      <div className="flex items-center gap-3">
+                        <img src={it.images?.[0]?.url || it.image} className="w-12 h-12 object-cover rounded-md" alt={it.name} />
+                        <div className="flex-1 min-w-0">
+                          <div className="font-bold truncate">{it.name}</div>
+                          <div className="text-sm text-stone-500">Qty: {it.qty || 1}</div>
+                        </div>
+                      </div>
+                      {it.extras && it.extras.length > 0 && (
+                        <div className="mt-3 grid grid-cols-1 gap-2">
+                          {it.extras.map((ex, idx) => {
+                            const checked = (it.selectedExtras || []).some(se => se.name === ex.name && Number(se.price) === Number(ex.price));
+                            return (
+                              <label key={idx} className="flex items-center justify-between gap-2 p-2 rounded-lg bg-white border">
+                                <div>
+                                  <div className="font-medium">{ex.name}</div>
+                                  <div className="text-sm text-stone-400">₦{ex.price}</div>
+                                </div>
+                                <input type="checkbox" checked={checked} onChange={(e) => {
+                                  const current = it.selectedExtras || [];
+                                  if (e.target.checked) {
+                                    updateExtras(it._id || it.id, [...current, { name: ex.name, price: ex.price }]);
+                                  } else {
+                                    updateExtras(it._id || it.id, current.filter(c => !(c.name === ex.name && Number(c.price) === Number(ex.price))));
+                                  }
+                                }} />
+                              </label>
+                            )
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {step === "drinks" && (
+              <div className="space-y-4 py-2">
+                <h3 className="font-black text-xl text-stone-900">Drinks</h3>
+                <p className="text-sm text-stone-500">Add chilled drinks to your order.</p>
+                <div className="mt-3 space-y-3">
+                  {loadingDrinks ? (
+                    <p className="text-sm text-stone-400">Loading drinks…</p>
+                  ) : availableDrinks.length === 0 ? (
+                    <p className="text-sm text-stone-400">No drinks available.</p>
+                  ) : (
+                    availableDrinks.map((d) => (
+                      <div key={d._id || d.id} className="flex items-center justify-between p-3 bg-white rounded-lg border">
+                        <div className="flex items-center gap-3">
+                          {d.images?.[0] && <img src={d.images[0].url || d.images[0]} alt={d.name} className="w-12 h-12 object-cover rounded-md" />}
+                          <div>
+                            <div className="font-medium">{d.name}</div>
+                            <div className="text-sm text-stone-400">₦{d.price}</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button onClick={() => { addToCart(d, 1); toast.success("Added drink to cart"); }} className="py-2 px-3 bg-red-600 text-white rounded-lg">Add</button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
             )}
 
             {step === "payment" && (
@@ -317,14 +390,48 @@ export default function CartDrawer() {
             {step === "details" && (
               <div className="flex gap-3">
                 <button 
+                  onClick={handleDetailsNext} 
+                  className="flex-[2] bg-red-600 text-white font-black py-5 rounded-2xl shadow-lg disabled:opacity-50 active:scale-[0.98] transition-all"
+                >
+                  Next: Add-ons
+                </button>
+                <button 
+                  onClick={() => setStep("cart")} 
+                  className="flex-1 py-5 rounded-2xl bg-stone-200 text-stone-700 font-bold active:scale-[0.98] transition-all"
+                >
+                  Back
+                </button>
+              </div>
+            )}
+
+            {step === "addons" && (
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => setStep("drinks")} 
+                  className="flex-[2] bg-red-600 text-white font-black py-5 rounded-2xl shadow-lg active:scale-[0.98] transition-all"
+                >
+                  Next: Drinks
+                </button>
+                <button 
+                  onClick={() => setStep("details")} 
+                  className="flex-1 py-5 rounded-2xl bg-stone-200 text-stone-700 font-bold active:scale-[0.98] transition-all"
+                >
+                  Back
+                </button>
+              </div>
+            )}
+
+            {step === "drinks" && (
+              <div className="flex gap-3">
+                <button 
                   onClick={handleOrderSubmit} 
                   disabled={submitting} 
                   className="flex-[2] bg-red-600 text-white font-black py-5 rounded-2xl shadow-lg disabled:opacity-50 active:scale-[0.98] transition-all"
                 >
-                  {submitting ? "Processing..." : "Confirm & Pay"}
+                  {submitting ? "Processing..." : "Next: Payment"}
                 </button>
                 <button 
-                  onClick={() => setStep("cart")} 
+                  onClick={() => setStep("addons")} 
                   className="flex-1 py-5 rounded-2xl bg-stone-200 text-stone-700 font-bold active:scale-[0.98] transition-all"
                 >
                   Back
