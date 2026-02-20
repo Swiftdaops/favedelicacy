@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { logoutAdmin, uploadAdminAvatar } from "@/api/auth.api";
 import { Grid, Utensils, Coffee, Package, CreditCard, LogOut, Menu, Plus, Bell, Users } from "lucide-react";
 import { useEffect } from "react";
@@ -14,7 +14,11 @@ function AdminLayoutInner({ children }) {
   const [open, setOpen] = useState(true);
   const fileRef = useRef(null);
   const router = useRouter();
+  const pathname = usePathname();
+  const isLoginRoute = pathname === "/admin/login";
   const { admin, setAdmin } = useAuth();
+
+  const [nowTs, setNowTs] = useState(0);
 
   const [pendingCount, setPendingCount] = useState(0);
   const [lastUpdateTs, setLastUpdateTs] = useState(0);
@@ -29,9 +33,18 @@ function AdminLayoutInner({ children }) {
   });
 
   const unread = Math.max(0, pendingCount - (lastSeenCount || 0));
-  const unreadReliable = unread > 0 && Date.now() - (lastUpdateTs || 0) < 30000;
+  const unreadReliable = unread > 0 && nowTs - (lastUpdateTs || 0) < 30000;
 
   useEffect(() => {
+    if (isLoginRoute) return;
+    setNowTs(Date.now());
+    const t = setInterval(() => setNowTs(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, [isLoginRoute]);
+
+  useEffect(() => {
+    if (isLoginRoute) return;
+
     let bc = null;
     try {
       bc = new BroadcastChannel("favedelicacy_admin");
@@ -177,7 +190,11 @@ function AdminLayoutInner({ children }) {
       window.removeEventListener("storage", onStorage);
       stopInterval();
     };
-  }, [router]);
+  }, [router, isLoginRoute]);
+
+  if (isLoginRoute) {
+    return <div className="min-h-screen">{children}</div>;
+  }
 
   return (
     <div className="min-h-screen flex text-stone-900">

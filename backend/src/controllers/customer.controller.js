@@ -16,6 +16,40 @@ function buildSegment({ lastOrderDate, totalRevenue }) {
 
 export const listCustomers = async (req, res, next) => {
   try {
+    // Backfill legacy orders that predate the `Order.customer` reference.
+    // This keeps the Customers page working without requiring a manual migration.
+    try {
+      const legacyOrders = await Order.find({
+        $or: [{ customer: { $exists: false } }, { customer: null }],
+      })
+        .limit(250)
+        .select("_id customerName customerPhone")
+        .lean();
+
+      if (legacyOrders.length) {
+        const ops = [];
+        for (const o of legacyOrders) {
+          if (!o?.customerPhone) continue;
+          const customer = await resolveCustomer({
+            phone: o.customerPhone,
+            customerName: o.customerName,
+          });
+          if (!customer?._id) continue;
+          ops.push({
+            updateOne: {
+              filter: { _id: o._id },
+              update: { $set: { customer: customer._id } },
+            },
+          });
+        }
+        if (ops.length) {
+          await Order.bulkWrite(ops, { ordered: false });
+        }
+      }
+    } catch (e) {
+      // best-effort only; aggregation below is still safe
+    }
+
     const page = Math.max(1, Number(req.query.page || 1));
     const limit = Math.min(100, Math.max(5, Number(req.query.limit || 20)));
     const q = String(req.query.q || "").trim();
@@ -144,9 +178,23 @@ export const listCustomers = async (req, res, next) => {
     const items = first.items || [];
     const total = first.meta?.[0]?.total || 0;
 
+    const normalizeCustomer = (c) => {
+      const obj = c || {};
+      return {
+        _id: obj._id,
+        cid: obj.cid ?? null,
+        phone: obj.phone ?? null,
+        email: obj.email ?? null,
+        firstName: obj.firstName ?? null,
+        lastName: obj.lastName ?? null,
+        createdAt: obj.createdAt ?? null,
+        updatedAt: obj.updatedAt ?? null,
+      };
+    };
+
     res.json({
       items: items.map((x) => ({
-        customer: x.customer,
+        customer: normalizeCustomer(x.customer),
         stats: {
           totalOrders: x.totalOrders,
           pendingOrders: x.pendingOrders,

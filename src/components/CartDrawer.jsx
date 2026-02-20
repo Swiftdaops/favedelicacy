@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { X, Plus, Minus, Trash, CheckCircle2, Copy, ArrowLeft } from "lucide-react";
+import { usePathname } from "next/navigation";
 import useCartStore from "@/store/cartStore";
 import {
   Drawer,
@@ -18,6 +19,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 
 export default function CartDrawer() {
+  const pathname = usePathname();
+  const isDrinksRoute = pathname?.startsWith("/drinks");
+
   const { items, drawerOpen, toggleDrawer, removeFromCart, updateQty, updateExtras, addToCart, total, clearCart } = useCartStore();
   const [step, setStep] = useState("cart"); // cart, details, addons, drinks, payment, upload, success
   const [submitting, setSubmitting] = useState(false);
@@ -30,6 +34,7 @@ export default function CartDrawer() {
   const [copied, setCopied] = useState(false);
   const [availableDrinks, setAvailableDrinks] = useState([]);
   const [loadingDrinks, setLoadingDrinks] = useState(false);
+  const [drinkQuery, setDrinkQuery] = useState("");
 
   // Focus management: Pull focus into the drawer immediately to avoid ARIA-hidden errors
   useEffect(() => {
@@ -47,6 +52,7 @@ export default function CartDrawer() {
       const timer = setTimeout(() => {
         setStep("cart");
         setForm({ customerName: "", customerPhone: "", deliveryAddress: "" });
+        setDrinkQuery("");
       }, 400);
       return () => clearTimeout(timer);
     }
@@ -122,6 +128,14 @@ export default function CartDrawer() {
       load();
     }
   }, [step]);
+
+  const filteredDrinks = (() => {
+    const q = (drinkQuery || "").trim().toLowerCase();
+    if (!q) return availableDrinks;
+    return (availableDrinks || []).filter((d) =>
+      String(d?.name || "").toLowerCase().includes(q)
+    );
+  })();
 
   function handleFileChange(e) {
     const file = e.target.files?.[0];
@@ -296,13 +310,23 @@ export default function CartDrawer() {
               <div className="space-y-4 py-2">
                 <h3 className="font-black text-xl text-stone-900">Drinks</h3>
                 <p className="text-sm text-stone-500">Add chilled drinks to your order.</p>
+
+                {isDrinksRoute && (
+                  <input
+                    value={drinkQuery}
+                    onChange={(e) => setDrinkQuery(e.target.value)}
+                    placeholder="Search drinks…"
+                    className="w-full p-3 rounded-xl border border-stone-200 outline-none focus:ring-2 focus:ring-red-600 transition-all font-medium"
+                  />
+                )}
+
                 <div className="mt-3 space-y-3">
                   {loadingDrinks ? (
                     <p className="text-sm text-stone-400">Loading drinks…</p>
-                  ) : availableDrinks.length === 0 ? (
+                  ) : filteredDrinks.length === 0 ? (
                     <p className="text-sm text-stone-400">No drinks available.</p>
                   ) : (
-                    availableDrinks.map((d) => (
+                    filteredDrinks.map((d) => (
                       <div key={d._id || d.id} className="flex items-center justify-between p-3 bg-white rounded-lg border">
                         <div className="flex items-center gap-3">
                           {(function(){
