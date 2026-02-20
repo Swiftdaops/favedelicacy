@@ -5,6 +5,7 @@ import PublicNavbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import BubbleSearch from "@/components/BubbleSearch";
 import SonnerToaster from "@/components/SonnerToaster";
+import PostHogProvider from "@/components/PostHogProvider";
 
 const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://favedelicacy.store").replace(/\/+$/, "");
 
@@ -74,12 +75,14 @@ export default function RootLayout({ children }) {
         suppressHydrationWarning
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <PublicNavbar />
-        <SonnerToaster />
-        {children}
-        <Footer />
-        <BubbleSearch />
-        <Analytics />
+        <PostHogProvider>
+          <PublicNavbar />
+          <SonnerToaster />
+          {children}
+          <Footer />
+          <BubbleSearch />
+          <Analytics />
+        </PostHogProvider>
       </body>
     </html>
   );
