@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "test:puppeteer": "node ./scripts/puppeteer_test.js",
     "generate:favicons": "node ./scripts/generate-favicons.js",
     "lint": "eslint"
   },
@@ -20,6 +21,8 @@
     "framer-motion": "^12.31.0",
     "lucide-react": "^0.563.0",
     "next": "16.1.6",
+    "node-fetch": "^2.7.0",
+    "puppeteer": "^24.37.5",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-hook-form": "^7.71.1",

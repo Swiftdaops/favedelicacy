@@ -48,7 +48,7 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="min-h-screen card flex items-center justify-center">
       <form
         onSubmit={submit}
         className="w-full max-w-md rounded-md bg-(--color-primary) p-8 shadow text-stone-950"
