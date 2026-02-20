@@ -4,7 +4,9 @@ import { useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { logoutAdmin, uploadAdminAvatar } from "@/api/auth.api";
-import { Grid, Utensils, Coffee, Package, CreditCard, LogOut, Menu, Plus } from "lucide-react";
+import { Grid, Utensils, Coffee, Package, CreditCard, LogOut, Menu, Plus, Bell } from "lucide-react";
+import { useEffect } from "react";
+import { getOrders } from "@/api/order.api";
 import { AuthProvider, useAuth } from "@/context/AuthProvider";
 
 function AdminLayoutInner({ children }) {
@@ -12,6 +14,79 @@ function AdminLayoutInner({ children }) {
       const fileRef = useRef(null);
       const router = useRouter();
       const { admin, setAdmin } = useAuth();
+      const [pendingCount, setPendingCount] = useState(0);
+      const [lastSeenCount, setLastSeenCount] = useState(() => {
+        try {
+          const v = localStorage.getItem('admin_last_seen_orders_count');
+          return v ? Number(v) : 0;
+        } catch (e) {
+          return 0;
+        }
+      });
+
+      useEffect(() => {
+        let mounted = true;
+        let channel;
+        async function load() {
+          try {
+            const res = await getOrders();
+            const list = res?.data || res || [];
+            if (!mounted) return;
+            const pending = list.filter((o) => o.status === "pending").length;
+            setPendingCount(pending);
+          } catch (err) {
+            // ignore
+          }
+        }
+
+        function onMessage(e) {
+          try {
+            const data = e?.data || (typeof e === 'string' ? JSON.parse(e) : null);
+            if (!data) return;
+            if (data.type === 'orders-updated') {
+              if (typeof data.pendingCount === 'number') setPendingCount(data.pendingCount);
+              else load();
+            } else if (data.type === 'orders-viewed') {
+              // another tab viewed orders, update lastSeen
+              const seen = Number(data.pendingCount || 0);
+              setLastSeenCount(seen);
+              try { localStorage.setItem('admin_last_seen_orders_count', String(seen)); } catch(e){}
+            }
+          } catch (err) {}
+        }
+
+        // BroadcastChannel for same-origin tabs
+        try {
+          channel = new BroadcastChannel('admin-orders');
+          channel.addEventListener('message', onMessage);
+        } catch (e) {
+          // fallback: listen to storage events
+          window.addEventListener('storage', (ev) => {
+            if (ev.key === 'admin_orders_updated') {
+              try {
+                const data = JSON.parse(ev.newValue || '{}');
+                if (data && typeof data.pendingCount === 'number') setPendingCount(data.pendingCount);
+              } catch (err) {}
+            }
+            if (ev.key === 'admin_orders_viewed') {
+              try {
+                const data = JSON.parse(ev.newValue || '{}');
+                if (data && typeof data.pendingCount === 'number') {
+                  setLastSeenCount(data.pendingCount);
+                }
+              } catch (err) {}
+            }
+          });
+        }
+
+        load();
+        const id = setInterval(load, 15000);
+        return () => {
+          mounted = false;
+          clearInterval(id);
+          try { channel?.close?.(); } catch (e) {}
+        };
+      }, []);
 
       return (
         <div className="min-h-screen flex text-stone-900">
@@ -73,15 +148,40 @@ function AdminLayoutInner({ children }) {
 
                 {open && (
                   <div>
-                    <div className="font-semibold">Admin</div>
+                    <div className="font-semibold">Fave</div>
                     <div className="text-sm">{admin?.email || "favedelicacy@admin.com"}</div>
                     <div className="mt-2">
-                      <button
-                        onClick={() => setOpen(false)}
-                        className="text-xs rounded-full px-3 py-1 border border-white/20 bg-transparent hover:bg-white/5"
-                      >
-                        Close
-                      </button>
+                      <div className="flex items-center gap-2">
+                          <button
+                          onClick={() => {
+                            // mark as viewed and navigate
+                            try { localStorage.setItem('admin_last_seen_orders_count', String(pendingCount)); } catch (e) {}
+                            setLastSeenCount(pendingCount);
+                            try {
+                              const ch = new BroadcastChannel('admin-orders');
+                              ch.postMessage({ type: 'orders-viewed', pendingCount });
+                              ch.close();
+                            } catch (e) {
+                              try { localStorage.setItem('admin_orders_viewed', JSON.stringify({ ts: Date.now(), pendingCount })); } catch (e) {}
+                            }
+                            router.push('/admin/orders');
+                          }}
+                          aria-label="Orders"
+                          className="relative p-2 rounded-full hover:bg-white/5"
+                        >
+                          <Bell className="w-4 h-4" />
+                          {(pendingCount > (lastSeenCount || 0)) && (
+                            <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center">{pendingCount - (lastSeenCount || 0)}</span>
+                          )}
+                        </button>
+
+                        <button
+                          onClick={() => setOpen(false)}
+                          className="text-xs rounded-full px-3 py-1 border border-white/20 bg-transparent hover:bg-white/5"
+                        >
+                          Close
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}

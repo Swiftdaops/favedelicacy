@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { updateFood } from "@/api/food.api";
+import { toast } from "sonner";
 
 export default function EditFoodForm({ food, onClose, onSuccess }) {
   const [name, setName] = useState(food.name || "");
@@ -31,10 +32,12 @@ export default function EditFoodForm({ food, onClose, onSuccess }) {
       }
 
       await updateFood(food._id, fd);
+      toast.success("Food updated");
       onSuccess && onSuccess();
       onClose && onClose();
     } catch (err) {
       setError(err.message || "Update failed");
+      toast.error(err.message || "Update failed");
     } finally {
       setLoading(false);
     }

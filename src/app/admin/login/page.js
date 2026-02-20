@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { loginAdmin } from "@/api/auth.api";
+import { toast } from "sonner";
+import { getOrders } from "@/api/order.api";
 
 export default function AdminLogin() {
   const router = useRouter();
@@ -18,6 +20,16 @@ export default function AdminLogin() {
 
     try {
       await loginAdmin({ email, password });
+      toast.success("Signed in");
+      // Fetch new pending orders and notify admin
+      try {
+        const orders = await getOrders();
+        const list = orders?.data || orders || [];
+        const pending = list.filter((o) => o.status === "pending").length;
+        if (pending > 0) toast(`You have ${pending} new order${pending > 1 ? 's' : ''}`);
+      } catch (e) {
+        // ignore order fetch errors here
+      }
       // On success backend sets httpOnly cookie. Redirect to admin dashboard.
       router.push("/admin/dashboard");
     } catch (err) {

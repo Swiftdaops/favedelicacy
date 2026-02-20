@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import { createDrink } from "@/api/drink.api";
+import { toast } from "sonner";
 
 export default function AddDrinkButton({ onSuccess }) {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ name: "", price: "", description: "" });
   const [files, setFiles] = useState([]);
+  const [creating, setCreating] = useState(false);
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -19,6 +21,7 @@ export default function AddDrinkButton({ onSuccess }) {
 
   async function submit(e) {
     e.preventDefault();
+    setCreating(true);
     try {
       const fd = new FormData();
       fd.append("name", form.name);
@@ -27,12 +30,16 @@ export default function AddDrinkButton({ onSuccess }) {
       files.forEach((f) => fd.append("images", f));
 
       await createDrink(fd);
+      toast.success("Drink created");
       setForm({ name: "", price: "", description: "" });
       setFiles([]);
       setOpen(false);
       if (onSuccess) onSuccess();
     } catch (err) {
       console.error(err);
+      toast.error(err?.message || "Create failed");
+    } finally {
+      setCreating(false);
     }
   }
 
@@ -87,7 +94,7 @@ export default function AddDrinkButton({ onSuccess }) {
 
               <div className="flex gap-2 justify-end mt-2">
                 <button type="button" onClick={() => setOpen(false)} className="px-3 py-2 rounded bg-white/10 text-stone-950">Cancel</button>
-                <button type="submit" className="px-3 py-2 rounded bg-[#e63a46] text-white">Create</button>
+                <button type="submit" disabled={creating} className="px-3 py-2 rounded bg-[#e63a46] text-white">{creating ? 'Creating...' : 'Create'}</button>
               </div>
             </form>
           </div>

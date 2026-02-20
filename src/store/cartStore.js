@@ -42,7 +42,13 @@ export const useCartStore = create((set, get) => ({
 
   clearCart: () => set({ items: [] }),
 
-  toggleDrawer: (open) => set((s) => ({ drawerOpen: typeof open === "boolean" ? open : !s.drawerOpen })),
+  toggleDrawer: (open) => set((s) => {
+    // when opening, blur the currently focused element to avoid aria-hidden focus issues
+    if (typeof window !== 'undefined' && (open === true || (typeof open === 'undefined' && !s.drawerOpen))) {
+      try { document.activeElement?.blur?.(); } catch (e) {}
+    }
+    return { drawerOpen: typeof open === "boolean" ? open : !s.drawerOpen };
+  }),
 
   count: () => get().items.reduce((sum, i) => sum + (i.qty || 0), 0),
   total: () =>

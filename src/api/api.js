@@ -2,12 +2,14 @@
 
 const API_PREFIX = "/api";
 
+// In the browser use a relative base so Next.js dev rewrites/proxy can
+// forward requests to the deployed backend (avoids CORS mismatches).
+// On the server (or when running outside the browser) fall back to the
+// configured NEXT_PUBLIC_API_URL or localhost.
 const BASE_URL =
   typeof window !== "undefined"
-    ? import.meta?.env?.VITE_API_URL ||
-      process.env.NEXT_PUBLIC_API_URL ||
-      "http://localhost:5000"
-    : "http://localhost:5000";
+    ? ""
+    : process.env.NEXT_PUBLIC_API_URL || "https://favedelicacybackend.onrender.com";
 
 /**
  * Core request handler

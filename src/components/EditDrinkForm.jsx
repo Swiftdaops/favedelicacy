@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { updateDrink } from "@/api/drink.api";
+import { toast } from "sonner";
 
 export default function EditDrinkForm({ initial, onClose, onSaved }) {
   const [form, setForm] = useState({ name: "", price: "", description: "" });
   const [files, setFiles] = useState([]);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (initial) setForm({ name: initial.name || "", price: initial.price || "", description: initial.description || "" });
@@ -22,6 +24,7 @@ export default function EditDrinkForm({ initial, onClose, onSaved }) {
 
   async function submit(e) {
     e.preventDefault();
+    setSaving(true);
     try {
       const fd = new FormData();
       fd.append("name", form.name);
@@ -30,10 +33,13 @@ export default function EditDrinkForm({ initial, onClose, onSaved }) {
       files.forEach((f) => fd.append("images", f));
 
       await updateDrink(initial._id, fd);
+      toast.success("Drink saved");
       if (onSaved) onSaved();
     } catch (err) {
       console.error(err);
+      toast.error(err?.message || "Save failed");
     }
+    setSaving(false);
   }
 
   return (
@@ -62,7 +68,9 @@ export default function EditDrinkForm({ initial, onClose, onSaved }) {
 
       <div className="flex gap-2 justify-end mt-2">
         <button type="button" onClick={onClose} className="px-3 py-2 rounded bg-white/10 text-stone-950">Cancel</button>
-        <button type="submit" className="px-3 py-2 rounded bg-[#e63a46] text-white">Save</button>
+        <button type="submit" disabled={saving} className="px-3 py-2 rounded bg-[#e63a46] text-white">
+          {saving ? "Saving..." : "Save"}
+        </button>
       </div>
     </form>
   );

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation"; // Use this instead of window.location
+import { usePathname } from "next/navigation";
 import {
   ShoppingBag,
   Search,
@@ -10,7 +10,6 @@ import {
   Phone,
   Menu,
   X,
-  ShoppingCart,
 } from "lucide-react";
 import { Utensils, Coffee } from "lucide-react";
 import useCartStore from "@/store/cartStore";
@@ -20,42 +19,41 @@ import { useSearchStore } from "@/store/search.store";
 export default function PublicNavbar() {
   const [open, setOpen] = useState(false);
   const headerRef = useRef(null);
-  const drawerOpen = useCartStore((s) => s.drawerOpen);
+
   const pathname = usePathname();
+  const drawerOpen = useCartStore((s) => s.drawerOpen);
+  const cartCount = useCartStore((s) =>
+    s.items.reduce((sum, i) => sum + (i.qty || 0), 0)
+  );
+  const toggleDrawer = useCartStore((s) => s.toggleDrawer);
+  const openSearch = useSearchStore((s) => s.openSearch);
 
   // Hide navbar on admin routes
   if (pathname?.startsWith("/admin")) {
     return null;
   }
 
-  // Cart logic moved out of JSX for cleaner code
-  const cartCount = useCartStore((s) => s.items.reduce((sum, i) => sum + (i.qty || 0), 0));
-  const toggleDrawer = useCartStore((s) => s.toggleDrawer);
-  const openSearch = useSearchStore((s) => s.openSearch);
-
+  /**
+   * Lock body scroll when any overlay is open
+   * This replaces the broken `inert` implementation.
+   */
   useEffect(() => {
-    const el = headerRef.current;
-    if (!el) return;
-
     if (drawerOpen || open) {
-      // If anything inside header has focus, blur it to avoid aria-hidden conflicts
-      if (document.activeElement && el.contains(document.activeElement)) {
-        document.activeElement.blur();
-      }
-      try {
-        el.setAttribute('inert', '');
-      } catch (e) {
-        // Some older browsers may not support inert; fall back to aria-hidden
-        el.setAttribute('aria-hidden', 'true');
-      }
+      document.body.style.overflow = "hidden";
     } else {
-      el.removeAttribute('inert');
-      el.removeAttribute('aria-hidden');
+      document.body.style.overflow = "";
     }
+
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [drawerOpen, open]);
 
   return (
-    <header ref={headerRef} className="sticky top-0 z-50 bg-[var(--background)]/70 backdrop-blur border-b border-white/30">
+    <header
+      ref={headerRef}
+      className="sticky top-0 z-50 bg-[var(--background)]/70 backdrop-blur border-b border-white/30"
+    >
       <div className="mx-auto max-w-7xl px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Brand */}
@@ -70,7 +68,7 @@ export default function PublicNavbar() {
           <nav className="hidden md:flex items-center gap-5">
             <Link
               href="/menu"
-              className="hidden sm:flex items-center gap-2 text-stone-900 hover:text-red-600"
+              className="flex items-center gap-2 text-stone-900 hover:text-red-600"
             >
               <Utensils className="h-4 w-4 text-red-600" />
               <span className="font-medium">Menu</span>
@@ -78,7 +76,7 @@ export default function PublicNavbar() {
 
             <Link
               href="/drinks"
-              className="hidden sm:flex items-center gap-2 text-stone-900 hover:text-red-600"
+              className="flex items-center gap-2 text-stone-900 hover:text-red-600"
             >
               <Coffee className="h-4 w-4 text-red-600" />
               <span className="font-medium">Drinks</span>
@@ -86,7 +84,7 @@ export default function PublicNavbar() {
 
             <Link
               href="/about"
-              className="hidden sm:flex items-center gap-2 text-stone-900 hover:text-red-600"
+              className="flex items-center gap-2 text-stone-900 hover:text-red-600"
             >
               <Info className="h-4 w-4 text-red-600" />
               <span className="font-medium">About</span>
@@ -94,24 +92,24 @@ export default function PublicNavbar() {
 
             <Link
               href="/contact"
-              className="hidden sm:flex items-center gap-2 text-stone-900 hover:text-red-600"
+              className="flex items-center gap-2 text-stone-900 hover:text-red-600"
             >
               <Phone className="h-4 w-4 text-red-600" />
               <span className="font-medium">Contact</span>
             </Link>
 
-    
-
+            {/* Search */}
             <button
               aria-label="Search"
-              onClick={() => openSearch()}
+              onClick={openSearch}
               className="rounded-full p-2 hover:bg-red-100 transition"
             >
               <Search className="h-5 w-5 text-red-600" />
             </button>
 
-            <button 
-              onClick={() => { document.activeElement?.blur(); toggleDrawer(true); }} 
+            {/* Cart */}
+            <button
+              onClick={() => toggleDrawer(true)}
               className="relative rounded-full p-2 hover:bg-red-100 transition"
             >
               <ShoppingBag className="h-5 w-5 text-red-600" />
@@ -127,14 +125,14 @@ export default function PublicNavbar() {
           <div className="flex items-center gap-2 md:hidden">
             <button
               aria-label="Search"
-              onClick={() => openSearch()}
+              onClick={openSearch}
               className="rounded-full p-2 hover:bg-red-100 transition"
             >
               <Search className="h-5 w-5 text-red-600" />
             </button>
 
-            <button 
-              onClick={() => { document.activeElement?.blur(); toggleDrawer(true); }} 
+            <button
+              onClick={() => toggleDrawer(true)}
               className="relative rounded-full p-2 hover:bg-red-100 transition"
             >
               <ShoppingBag className="h-5 w-5 text-red-600" />
@@ -147,7 +145,7 @@ export default function PublicNavbar() {
 
             <button
               aria-label="Menu"
-              onClick={() => { document.activeElement?.blur(); setOpen(true); }}
+              onClick={() => setOpen(true)}
               className="rounded-full p-2 hover:bg-red-100 transition"
             >
               <Menu className="h-6 w-6 text-red-600" />
@@ -160,11 +158,12 @@ export default function PublicNavbar() {
       {open && (
         <div className="fixed inset-0 z-[60]">
           {/* Backdrop */}
-          <div 
-            className="absolute inset-0 bg-black/40" 
-            onClick={() => setOpen(false)} 
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setOpen(false)}
           />
-          
+
+          {/* Drawer */}
           <div className="absolute right-0 top-0 h-full w-72 bg-white p-6 shadow-xl animate-in slide-in-from-right">
             <div className="flex items-center justify-between">
               <span className="text-lg font-bold text-red-600">Menu</span>
@@ -173,7 +172,7 @@ export default function PublicNavbar() {
               </button>
             </div>
 
-            <nav className="mt-8 flex flex-col gap-4 card">
+            <nav className="mt-8 flex flex-col gap-4">
               <Link
                 href="/menu"
                 onClick={() => setOpen(false)}
@@ -209,12 +208,11 @@ export default function PublicNavbar() {
                 <Phone className="h-5 w-5 text-red-600" />
                 <span className="font-medium">Contact</span>
               </Link>
-
-            
             </nav>
           </div>
         </div>
       )}
+
       <CartDrawer />
     </header>
   );

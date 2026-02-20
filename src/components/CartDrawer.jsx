@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { X, Plus, Minus, Trash, CheckCircle2, Copy } from "lucide-react";
+import { X, Plus, Minus, Trash, CheckCircle2, Copy, ArrowLeft } from "lucide-react";
 import useCartStore from "@/store/cartStore";
 import {
   Drawer,
@@ -12,6 +12,7 @@ import {
   DrawerClose,
 } from "@/components/ui/drawer";
 import { createOrder } from "@/api/order.api";
+import { getDrinks } from "@/api/drink.api";
 import { uploadPaymentProof } from "@/api/payment.api";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
@@ -95,15 +96,23 @@ export default function CartDrawer() {
     setStep("addons");
   }
 
+  // Allow user to go back to the previous step in the drawer
+  const stepOrder = ["cart", "details", "addons", "drinks", "payment", "upload", "success"];
+  function handleBack() {
+    const idx = stepOrder.indexOf(step);
+    if (idx > 0) setStep(stepOrder[idx - 1]);
+    else setStep("cart");
+  }
+
   useEffect(() => {
     if (step === "drinks") {
       const load = async () => {
         setLoadingDrinks(true);
         try {
-          const apiBase = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
-          const res = await fetch(`${apiBase}/api/drinks?all=true`);
-          const data = (await res.json()) || [];
-          setAvailableDrinks(data);
+          const data = await getDrinks(true);
+          // getDrinks returns parsed data (or an object with `data`), so normalize
+          const list = data?.data || data || [];
+          setAvailableDrinks(list);
         } catch (err) {
           setAvailableDrinks([]);
         } finally {
@@ -152,15 +161,29 @@ export default function CartDrawer() {
           
           <DrawerHeader className="flex flex-row items-center justify-between border-b pb-4 px-6">
             <div className="flex-1">
-              <DrawerTitle className="text-2xl font-black text-stone-900">
-                {step === "success" ? "Order Confirmed" : "FaveDelicacy"}
-              </DrawerTitle>
+              <div className="flex items-center gap-3">
+                {step !== "cart" && step !== "success" && (
+                  <button
+                    onClick={handleBack}
+                    className="p-2 rounded-full hover:bg-stone-100 transition-colors outline-none focus:ring-2 focus:ring-red-500"
+                    aria-label="Back"
+                  >
+                    <ArrowLeft size={18} />
+                  </button>
+                )}
+
+                <DrawerTitle className="text-2xl font-black text-stone-900">
+                  {step === "success" ? "Order Confirmed" : "FaveDelicacy"}
+                </DrawerTitle>
+              </div>
+
               {step === "cart" && (
                 <DrawerDescription className="text-stone-500 font-medium">
                   {items.length} {items.length === 1 ? 'item' : 'items'} in your cart
                 </DrawerDescription>
               )}
             </div>
+
             <DrawerClose asChild>
               <button 
                 ref={firstFocusable} 
@@ -190,11 +213,11 @@ export default function CartDrawer() {
                         exit={{ opacity: 0, scale: 0.9 }}
                         className="flex items-center gap-4 p-3 border border-stone-100 rounded-2xl bg-stone-50/50"
                       >
-                        <img 
-                          src={it.images?.[0]?.url || it.image} 
-                          className="w-16 h-16 object-cover rounded-xl bg-white shadow-sm" 
-                          alt={it.name} 
-                        />
+                        {(function(){
+                          const imgCandidate = it.images && it.images[0] ? (it.images[0].url || it.images[0]) : it.image;
+                          const src = typeof imgCandidate === 'string' ? imgCandidate : '';
+                          return <img src={src} className="w-16 h-16 object-cover rounded-xl bg-white shadow-sm" alt={it.name} />;
+                        })()}
                         <div className="flex-1 min-w-0">
                           <h4 className="font-bold text-stone-900 truncate">{it.name}</h4>
                           <p className="text-sm font-bold text-red-600">₦{Number(it.price).toLocaleString()}</p>
@@ -282,7 +305,11 @@ export default function CartDrawer() {
                     availableDrinks.map((d) => (
                       <div key={d._id || d.id} className="flex items-center justify-between p-3 bg-white rounded-lg border">
                         <div className="flex items-center gap-3">
-                          {d.images?.[0] && <img src={d.images[0].url || d.images[0]} alt={d.name} className="w-12 h-12 object-cover rounded-md" />}
+                          {(function(){
+                            const imgCandidate = d.images && d.images[0] ? (d.images[0].url || d.images[0]) : null;
+                            const src = typeof imgCandidate === 'string' ? imgCandidate : null;
+                            return src ? <img src={src} alt={d.name} className="w-12 h-12 object-cover rounded-md" /> : null;
+                          })()}
                           <div>
                             <div className="font-medium">{d.name}</div>
                             <div className="text-sm text-stone-400">₦{d.price}</div>

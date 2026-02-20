@@ -1,12 +1,13 @@
 import React from 'react';
+import { RotateCcw } from 'lucide-react';
 
-export default function OrdersTable({ orders = [], onMarkDelivered = () => {}, onDelete = () => {} }) {
+export default function OrdersTable({ orders = [], onToggleDelivered = () => {}, loadingIds = {}, onDelete = () => {}, pendingActions = {}, onUndo = () => {} }) {
   return (
     <div className="w-full overflow-auto">
-      <table className="w-full table-auto border-collapse">
+      <table className="w-full table-fixed border-collapse">
         <thead>
           <tr className="bg-stone-50">
-            <th className="text-left px-4 py-2 text-xs text-stone-500">Order</th>
+            <th className="text-left px-4 py-2 text-xs text-stone-500 w-28">Order</th>
             <th className="text-left px-4 py-2 text-xs text-stone-500">Customer</th>
             <th className="text-left px-4 py-2 text-xs text-stone-500">Phone</th>
             <th className="text-left px-4 py-2 text-xs text-stone-500">Items</th>
@@ -20,31 +21,40 @@ export default function OrdersTable({ orders = [], onMarkDelivered = () => {}, o
         <tbody>
           {orders.map((o) => (
             <tr key={o._id} className="border-b last:border-b-0 bg-white odd:bg-white even:bg-stone-50">
-              <td className="px-4 py-3 text-sm text-stone-900 font-medium">{o._id?.slice?.(0, 8) || o._id}</td>
-              <td className="px-4 py-3 text-sm text-stone-700">{o.customerName || '—'}</td>
-              <td className="px-4 py-3 text-sm text-stone-700">{o.customerPhone || '—'}</td>
+              <td className="px-4 py-3 text-sm text-stone-900 font-medium truncate">{o._id?.slice?.(0, 8) || o._id}</td>
+              <td className="px-4 py-3 text-sm text-stone-700 min-w-0 truncate">{o.customerName || '—'}</td>
+              <td className="px-4 py-3 text-sm text-stone-700 truncate">{o.customerPhone || '—'}</td>
               <td className="px-4 py-3 text-sm text-stone-700">{(o.items || []).length}</td>
               <td className="px-4 py-3 text-sm text-stone-900 text-right">₦{Number(o.totalAmount || o.total || 0).toLocaleString()}</td>
-              <td className="px-4 py-3 text-sm">
+              <td className="px-4 py-3 text-sm whitespace-nowrap">
                 {(['paid','confirmed','delivered'].includes(o.status)) ? (
-                  <span className="inline-block px-2 py-1 text-xs font-semibold rounded bg-lime-100 text-lime-700">Paid</span>
+                  <span className="inline-block px-2 py-1 text-xs font-semibold rounded bg-lime-100 text-lime-700 whitespace-nowrap">Paid</span>
                 ) : (
-                  <span className="inline-block px-2 py-1 text-xs font-semibold rounded bg-yellow-50 text-yellow-800">Pending payment</span>
+                  <span className="inline-block px-2 py-1 text-xs font-semibold rounded bg-yellow-50 text-yellow-800 whitespace-nowrap">Pending payment</span>
                 )}
               </td>
-              <td className="px-4 py-3 text-sm">
-                <span className={`inline-block px-2 py-1 text-xs font-semibold rounded ${o.status === 'delivered' ? 'bg-lime-100 text-lime-700' : 'bg-yellow-50 text-yellow-800'}`}>
+              <td className="px-4 py-3 text-sm whitespace-nowrap">
+                <span className={`inline-block px-2 py-1 text-xs font-semibold rounded ${o.status === 'delivered' ? 'bg-lime-100 text-lime-700' : 'bg-yellow-50 text-yellow-800'} whitespace-nowrap`}>
                   {o.status}
                 </span>
               </td>
-              <td className="px-4 py-3 text-sm text-stone-600">{new Date(o.createdAt || o.created || Date.now()).toLocaleString()}</td>
-              <td className="px-4 py-3 text-sm flex items-center gap-2">
-                {o.status !== 'delivered' ? (
-                  <button onClick={() => onMarkDelivered(o._id)} className="bg-stone-900 text-white px-3 py-1 rounded-md text-sm">Mark Delivered</button>
+              <td className="px-4 py-3 text-sm text-stone-600 truncate">{new Date(o.createdAt || o.created || Date.now()).toLocaleString()}</td>
+              <td className="px-4 py-3 text-sm flex items-center gap-2 whitespace-nowrap">
+                {pendingActions[o._id] ? (
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-stone-500">Scheduled</span>
+                    <button onClick={() => onUndo(o._id)} className="bg-yellow-600 text-white px-2 py-1 rounded-md text-sm">Undo</button>
+                  </div>
                 ) : (
-                  <span className="text-sm text-stone-600">—</span>
+                  <>
+                    {o.status !== 'delivered' ? (
+                      <button disabled={!!loadingIds[o._id]} onClick={() => onToggleDelivered(o._id, o.status)} className="bg-stone-900 text-white px-3 py-1 rounded-md text-sm">{loadingIds[o._id] ? 'Saving...' : 'Mark Delivered'}</button>
+                    ) : (
+                      <button disabled={!!loadingIds[o._id]} onClick={() => onToggleDelivered(o._id, o.status)} className="bg-yellow-600 text-white px-3 py-1 rounded-md text-sm flex items-center gap-2">{loadingIds[o._id] ? 'Saving...' : (<><RotateCcw size={14}/>Undo</>)}</button>
+                    )}
+                    <button onClick={() => onDelete(o._id)} className="bg-red-600 text-white px-3 py-1 rounded-md text-sm">Delete</button>
+                  </>
                 )}
-                <button onClick={() => onDelete(o._id)} className="bg-red-600 text-white px-3 py-1 rounded-md text-sm">Delete</button>
               </td>
             </tr>
           ))}
