@@ -1,5 +1,11 @@
 import Customer from "../models/customer.model.js";
 
+function generateCid() {
+  const t = Date.now().toString(36);
+  const r = Math.random().toString(36).slice(2, 6).toUpperCase();
+  return `CUST-${t}-${r}`;
+}
+
 function normalizePhone(phone) {
   if (!phone) return "";
   return String(phone).trim().replace(/[\s\-()]/g, "");
@@ -32,8 +38,17 @@ export async function resolveCustomer({ cid, phone, email, customerName, firstNa
   const resolvedLastName = lastName || derived.lastName;
 
   if (!customer) {
+    if (!normalizedPhone) {
+      const err = new Error("Phone number is required to create a new customer");
+      err.status = 400;
+      throw err;
+    }
+
+    // If caller didn't provide a CID, generate one at submission time.
+    const finalCid = cid ? String(cid).trim() : generateCid();
+
     customer = await Customer.create({
-      cid: cid ? String(cid).trim() : undefined,
+      cid: finalCid,
       phone: normalizedPhone,
       email: normalizedEmail || undefined,
       firstName: resolvedFirstName,
@@ -66,6 +81,27 @@ export async function resolveCustomer({ cid, phone, email, customerName, firstNa
 
   if (dirty) await customer.save();
   return customer;
+}
+
+/**
+ * Same as resolveCustomer(), but returns whether a new document was created.
+ */
+export async function resolveCustomerWithMeta({ cid, phone, email, customerName, firstName, lastName }) {
+  const normalizedPhone = normalizePhone(phone);
+  const normalizedEmail = email ? String(email).trim().toLowerCase() : "";
+
+  let existing = null;
+  if (cid) existing = await Customer.findOne({ cid: String(cid).trim() });
+  if (!existing && normalizedPhone) existing = await Customer.findOne({ phone: normalizedPhone });
+  if (!existing && normalizedEmail) existing = await Customer.findOne({ email: normalizedEmail });
+
+  if (!existing) {
+    const customer = await resolveCustomer({ cid, phone, email, customerName, firstName, lastName });
+    return { customer, isNewCustomer: true };
+  }
+
+  const customer = await resolveCustomer({ cid, phone, email, customerName, firstName, lastName });
+  return { customer, isNewCustomer: false };
 }
 
 export const customerUtils = { normalizePhone, splitName };
